@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Pstor</string>
     <string name="settings_app_key_txt">Enter your B2 App Key</string>
+    <string name="settings_app_key_errors_empty">Please enter a value</string>
     <string name="settings_app_key_id_txt">Enter your B2 App Key ID</string>
+    <string name="settings_app_key_id_errors_empty">Please enter a value</string>
+    <string name="settings_app_save_btn">Save</string>
 </resources>
