@@ -5,4 +5,11 @@
     <string name="settings_app_key_id_txt">Enter your B2 App Key ID</string>
     <string name="settings_app_key_id_errors_empty">Please enter a value</string>
     <string name="settings_app_save_btn">Save</string>
+
+    <string name="settings_app_save_success">The credentials are valid</string>
+    <string name="settings_app_save_fail">Invalid credentials</string>
+
+
+    <string name="common_errors_empty">Please enter a value</string>
+    <string name="common_laoding">Loading</string>
 </resources>

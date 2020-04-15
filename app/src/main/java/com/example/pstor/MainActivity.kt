@@ -1,10 +1,14 @@
 package com.example.pstor
 
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
+import com.example.pstor.b2.VolleyB2Client
 
 /*
 Required for this application:
@@ -21,25 +25,44 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onSend(view: View) {
-        val tvKeyId = findViewById<EditText>(R.id.txtKeyId)
-        val tvKey = findViewById<EditText>(R.id.txtKey)
+        val txtKeyId = findViewById<EditText>(R.id.txtKeyId)
+        val txtKey = findViewById<EditText>(R.id.txtKey)
+        val btnSave = findViewById<Button>(R.id.btnSave)
 
-        val creds = validateAndBuildCredentials(tvKeyId, tvKey)
+        val tvSaveResult = findViewById<TextView>(R.id.tvSaveResult)
+        tvSaveResult.visibility = View.INVISIBLE
+
+        val creds = validateAndBuildCredentials(txtKeyId, txtKey)
+        if (creds != null) {
+            btnSave.isEnabled = false
+
+            VolleyB2Client.checkCredentials(creds, this) { response ->
+                val msg =
+                    if (response) getString(R.string.settings_app_save_success) else getString(R.string.settings_app_save_fail)
+                val color = if (response) Color.GREEN else Color.RED
+
+                tvSaveResult.text = msg
+                tvSaveResult.setTextColor(color)
+                tvSaveResult.visibility = View.VISIBLE
+
+                btnSave.isEnabled = true
+            }
+        }
     }
 
-    fun validateAndBuildCredentials(tvKeyId: EditText, tvKey: EditText): B2Credentials? {
-        if (TextUtils.isEmpty(tvKeyId.text)) {
-            tvKeyId.error = getString(R.string.settings_app_key_id_errors_empty)
+    private fun validateAndBuildCredentials(txtKeyId: EditText, txtKey: EditText): B2Credentials? {
+        if (TextUtils.isEmpty(txtKeyId.text)) {
+            txtKeyId.error = getString(R.string.common_errors_empty)
             return null
         } else {
-            tvKeyId.error = null
+            txtKeyId.error = null
         }
-        if (TextUtils.isEmpty(tvKey.text)) {
-            tvKey.error = getString(R.string.settings_app_key_errors_empty)
+        if (TextUtils.isEmpty(txtKey.text)) {
+            txtKey.error = getString(R.string.common_errors_empty)
             return null
         } else {
-            tvKey.error = null
+            txtKey.error = null
         }
-        return B2Credentials(tvKeyId.text.toString(), tvKey.text.toString())
+        return B2Credentials(txtKeyId.text.toString(), txtKey.text.toString())
     }
 }

@@ -52,7 +52,7 @@
         app:layout_constraintTop_toBottomOf="@+id/tvKey" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/btnSave"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -60,6 +60,16 @@
         android:onClick="onSend"
         android:text="@string/settings_app_save_btn"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtKey" />
+
+    <TextView
+        android:id="@+id/tvSaveResult"
+        android:layout_width="273dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/settings_app_save_success"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtKey" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
