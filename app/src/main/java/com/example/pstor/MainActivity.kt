@@ -3,12 +3,14 @@ package com.example.pstor
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Editable
 import android.text.TextUtils
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import com.example.pstor.b2.VolleyB2Client
+import com.example.pstor.preferences.SecurePreference
 
 /*
 Required for this application:
@@ -18,10 +20,28 @@ Required for this application:
  */
 
 class MainActivity : AppCompatActivity() {
+    private val PREF_B2_KEY_ID = "B2_KEY_ID"
+    private val PREF_B2_KEY = "B2_KEY"
+
+    private var securePreference: SecurePreference? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        securePreference = SecurePreference.load(this)
+
+
+        val creds = loadCredentials()
+        if (creds != null){
+            val txtKeyId = findViewById<EditText>(R.id.txtKeyId)
+            txtKeyId.text = Editable.Factory.getInstance().newEditable(creds.keyId)
+            val txtKey = findViewById<EditText>(R.id.txtKey)
+            txtKey.text = Editable.Factory.getInstance().newEditable(creds.key)
+        }
+
+
     }
 
     fun onSend(view: View) {
@@ -37,9 +57,17 @@ class MainActivity : AppCompatActivity() {
             btnSave.isEnabled = false
 
             VolleyB2Client.checkCredentials(creds, this) { response ->
-                val msg =
-                    if (response) getString(R.string.settings_app_save_success) else getString(R.string.settings_app_save_fail)
-                val color = if (response) Color.GREEN else Color.RED
+                val msg: String
+                val color: Int
+                if (response) {
+                    msg =  getString(R.string.settings_app_save_success)
+                    color = Color.GREEN
+
+                    saveCredentials(creds)
+                } else {
+                    msg = getString(R.string.settings_app_save_fail)
+                    color = Color.RED
+                }
 
                 tvSaveResult.text = msg
                 tvSaveResult.setTextColor(color)
@@ -64,5 +92,20 @@ class MainActivity : AppCompatActivity() {
             txtKey.error = null
         }
         return B2Credentials(txtKeyId.text.toString(), txtKey.text.toString())
+    }
+
+    private fun saveCredentials(b2Credentials: B2Credentials) {
+        securePreference?.let {
+            it.put(PREF_B2_KEY_ID, b2Credentials.keyId)
+            it.put(PREF_B2_KEY, b2Credentials.key)
+        }
+    }
+
+    private fun loadCredentials(): B2Credentials? {
+        return securePreference?.let {
+            val keyId = it.get(PREF_B2_KEY_ID)
+            val key = it.get(PREF_B2_KEY)
+            return if (key != null && keyId != null) B2Credentials(keyId, key) else null
+        }
     }
 }
