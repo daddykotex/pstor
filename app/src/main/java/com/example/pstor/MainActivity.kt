@@ -9,7 +9,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.example.pstor.b2.VolleyB2Client
+import com.example.pstor.b2.VolleyB2CredentialsClient
 import com.example.pstor.preferences.SecurePreference
 
 /*
@@ -56,11 +56,11 @@ class MainActivity : AppCompatActivity() {
         if (creds != null) {
             btnSave.isEnabled = false
 
-            VolleyB2Client.checkCredentials(creds, this) { response ->
+            VolleyB2CredentialsClient.checkCredentials(creds, this) { response ->
                 val msg: String
                 val color: Int
-                if (response) {
-                    msg =  getString(R.string.settings_app_save_success)
+                if (response != null) {
+                    msg =  getString(R.string.settings_app_save_success, response.apiUrl)
                     color = Color.GREEN
 
                     saveCredentials(creds)

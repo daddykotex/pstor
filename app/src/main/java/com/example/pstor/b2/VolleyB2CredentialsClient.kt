@@ -6,38 +6,35 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.backblaze.b2.client.structures.B2AccountAuthorization
 import com.example.pstor.B2Credentials
 import org.json.JSONObject
 
-object VolleyB2Client {
+object VolleyB2CredentialsClient {
     private val VERSION = "v2"
     private val url = "https://api.backblazeb2.com/b2api/$VERSION/b2_authorize_account"
 
-    fun checkCredentials(b2Credentials: B2Credentials, context: Context, callback: (response: Boolean) -> Unit): Unit {
+    fun checkCredentials(b2Credentials: B2Credentials, context: Context, callback: (response: B2AccountAuthorization?) -> Unit) {
         val creds = Base64.encodeToString("${b2Credentials.keyId}:${b2Credentials.key}".toByteArray(), Base64.DEFAULT)
 
         val queue = Volley.newRequestQueue(context)
 
-        val jsonObjectRequest = object : JsonObjectRequest(
+        val jsonObjectRequest = VolleyB2JsonRequest(
             Request.Method.GET,
             url,
-            null,
-            Response.Listener<JSONObject> {
-                callback(true)
-            },
+            mapOf("Authorization" to "Basic $creds"),
+            B2AccountAuthorization::class.java,
             Response.ErrorListener { error ->
                 if (error.networkResponse.statusCode == 401) {
-                    callback(false)
+                    callback(null)
                 } else {
                     throw error
                 }
+            },
+            Response.Listener { response ->
+                callback(response)
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> {
-                return mapOf("Authorization" to "Basic $creds").toMutableMap()
-            }
-        }
-
+        )
         queue.add(jsonObjectRequest)
     }
 }
