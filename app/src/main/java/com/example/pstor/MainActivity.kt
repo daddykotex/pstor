@@ -1,7 +1,6 @@
 package com.example.pstor
 
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
@@ -9,6 +8,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.example.pstor.b2.VolleyB2CredentialsClient
 import com.example.pstor.preferences.SecurePreference
 
