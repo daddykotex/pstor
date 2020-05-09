@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import java.security.GeneralSecurityException
 import java.security.Key
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -70,14 +71,18 @@ class SecurePreference(context: Context) {
         return Base64.encodeToString(encodedBytes, Base64.DEFAULT)
     }
 
-    private fun decodeAndDecrypt(input: String): String {
+    private fun decodeAndDecrypt(input: String): String? {
         val c: Cipher = Cipher.getInstance(AES_MODE)
         c.init(
             Cipher.DECRYPT_MODE,
             getKey(),
             GCMParameterSpec(128, DUMMY_IV.toByteArray())
         )
-        return String(c.doFinal(Base64.decode(input, Base64.DEFAULT)))
+        try {
+            return String(c.doFinal(Base64.decode(input, Base64.DEFAULT)))
+        } catch (ex: GeneralSecurityException) {
+            return null
+        }
     }
 
     private fun getKey(): Key {
