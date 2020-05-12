@@ -1,4 +1,4 @@
-package com.example.pstor.preferences
+package com.pstor.preferences
 
 import android.annotation.SuppressLint
 import android.content.Context

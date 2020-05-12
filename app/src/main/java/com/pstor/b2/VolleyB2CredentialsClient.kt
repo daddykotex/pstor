@@ -1,14 +1,12 @@
-package com.example.pstor.b2
+package com.pstor.b2
 
 import android.content.Context
 import android.util.Base64
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.backblaze.b2.client.structures.B2AccountAuthorization
-import com.example.pstor.B2Credentials
-import org.json.JSONObject
+import com.pstor.B2Credentials
 
 object VolleyB2CredentialsClient {
     private val VERSION = "v2"

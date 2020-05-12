@@ -1,4 +1,4 @@
-package com.example.pstor
+package com.pstor
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

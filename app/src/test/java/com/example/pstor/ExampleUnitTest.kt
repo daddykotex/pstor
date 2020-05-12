@@ -1,4 +1,4 @@
-package com.example.pstor
+package com.pstor
 
 import org.junit.Test
 

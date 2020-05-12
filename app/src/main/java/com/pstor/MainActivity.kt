@@ -1,4 +1,4 @@
-package com.example.pstor
+package com.pstor
 
 import android.graphics.Color
 import android.os.Bundle
@@ -9,8 +9,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.pstor.b2.VolleyB2CredentialsClient
-import com.example.pstor.preferences.SecurePreference
+import com.pstor.b2.VolleyB2CredentialsClient
+import com.pstor.preferences.SecurePreference
 
 /*
 Required for this application:
