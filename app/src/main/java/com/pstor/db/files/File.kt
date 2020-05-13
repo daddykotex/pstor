@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class File(
-    @PrimaryKey val fullPath: String,
+    @PrimaryKey val id: Long,
+    @ColumnInfo(name = "content_uri") val contentUri: String,
     @ColumnInfo(name = "status") val status: String
 )

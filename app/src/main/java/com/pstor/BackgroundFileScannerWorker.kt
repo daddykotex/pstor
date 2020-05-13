@@ -9,14 +9,7 @@ import androidx.room.Room
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.pstor.db.PStorDatabase
-
-data class Image(val uri: Uri,
-                 val name: String,
-                 val dateAdded: Long,
-                 val size: Long
-)
-
-
+import com.pstor.db.files.File
 
 class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
@@ -31,7 +24,8 @@ class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParam
     override fun doWork(): Result {
         Log.i(tag, "Starting work.")
 
-        val imagesList = mutableListOf<Image>()
+        val count = db.fileDAO().count()
+        Log.i(tag, "Images in queue: ${count}")
 
         val projection = arrayOf(
             MediaStore.Images.Media._ID,
@@ -70,15 +64,16 @@ class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParam
                     id
                 )
 
-                imagesList += Image(contentUri, name, dateAdded, size)
+                val image = ImageContent(id, contentUri, name, dateAdded, size)
+                val fileEntry = db.fileDAO().loadById(image.id)
+                if (fileEntry == null) {
+                    Log.d(tag, "Queueing image with id: ${image.id}")
+                    db.fileDAO().insert(File(image.id, image.uri.toString(), ImageStatus.IN_QUEUE.toString()))
+                }
             }
         }
 
-        Log.i(tag, "Got ${imagesList.size} files")
-        imagesList.forEach { i->
-            Log.i(tag, "Image: ${i.name} at ${i.uri}")
-        }
-
+        Log.d(tag, "Done looking up images.")
         return Result.success()
     }
 }

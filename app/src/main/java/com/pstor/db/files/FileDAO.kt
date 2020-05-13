@@ -7,17 +7,26 @@ import androidx.room.Query
 
 @Dao
 interface FileDAO {
-    @Query("SELECT fullPath, status FROM file")
+    @Query("SELECT COUNT(id) FROM file")
+    fun count(): Long
+
+    @Query("SELECT id, content_uri, status, status FROM file")
     fun getAll(): List<File>
 
-    @Query("SELECT fullPath, status FROM file WHERE fullPath IN (:fullPaths)")
-    fun loadAllByIds(fullPaths: Array<String>): List<File>
+    @Query("SELECT id, content_uri, status FROM file WHERE id IN (:ids)")
+    fun loadAllByIds(ids: Array<Long>): List<File>
 
-    @Query("SELECT fullPath, status FROM file WHERE status = :status")
+    @Query("SELECT id, content_uri, status FROM file WHERE id = :id")
+    fun loadById(id: Long): File?
+
+    @Query("SELECT id, content_uri, status FROM file WHERE status = :status")
     fun findByStatus(status: String): List<File>
 
     @Insert
     fun insertAll(vararg files: File)
+
+    @Insert
+    fun insert(files: File)
 
     @Delete
     fun delete(file: File)
