@@ -9,7 +9,7 @@ import androidx.room.Room
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.pstor.db.PStorDatabase
-import com.pstor.db.files.File
+import com.pstor.db.files.Queue
 
 class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
@@ -24,7 +24,7 @@ class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParam
     override fun doWork(): Result {
         Log.i(tag, "Starting work.")
 
-        val count = db.fileDAO().count()
+        val count = db.queueDAO().count()
         Log.i(tag, "Images in queue: ${count}")
 
         val projection = arrayOf(
@@ -65,10 +65,10 @@ class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParam
                 )
 
                 val image = ImageContent(id, contentUri, name, dateAdded, size)
-                val fileEntry = db.fileDAO().loadById(image.id)
+                val fileEntry = db.queueDAO().loadById(image.id)
                 if (fileEntry == null) {
                     Log.d(tag, "Queueing image with id: ${image.id}")
-                    db.fileDAO().insert(File(image.id, image.uri.toString(), ImageStatus.IN_QUEUE.toString()))
+                    db.queueDAO().insert(Queue(image.id, image.uri.toString(), ImageStatus.IN_QUEUE.toString()))
                 }
             }
         }
