@@ -10,9 +10,6 @@ import java.util.concurrent.TimeUnit
  * The [Application]. Responsible for initializing [WorkManager] in [Log.VERBOSE] mode.
  */
 class App : Application(), Configuration.Provider {
-    init {
-        Log.i("PSTOR", "sauce")
-    }
     override fun getWorkManagerConfiguration() =
         Configuration.Builder()
             .setMinimumLoggingLevel(Log.VERBOSE)
@@ -21,10 +18,25 @@ class App : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-        val uploadWorkRequest = PeriodicWorkRequestBuilder<BackgroundFileScannerWorker>(15, TimeUnit.MINUTES).build()
-        Log.i("PSTOR", "Registered BackgroundFileScannerWorker for work.")
+        Log.d("Pstor", "onCreate called")
 
-        WorkManager.getInstance(this).enqueue(uploadWorkRequest)
+        val fileScannerWorker =
+            PeriodicWorkRequestBuilder<BackgroundFileScannerWorker>(15, TimeUnit.MINUTES).build()
+        val fileUploaderWorker =
+            PeriodicWorkRequestBuilder<BackgroundFileUploaderWorker>(15, TimeUnit.MINUTES).build()
+
+        val existingWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            BackgroundFileScannerWorker::class.java.simpleName,
+            existingWorkPolicy,
+            fileScannerWorker
+        )
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            BackgroundFileUploaderWorker::class.java.simpleName,
+            existingWorkPolicy,
+            fileUploaderWorker
+        )
 
     }
 }

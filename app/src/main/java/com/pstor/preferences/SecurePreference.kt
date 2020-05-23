@@ -60,6 +60,11 @@ class SecurePreference(context: Context) {
         }
     }
 
+    @SuppressLint("ApplySharedPref")
+    fun remove(key: String) {
+        sharedPreferences.edit().remove(key).commit()
+    }
+
     private fun encryptAndEncode(input: String): String {
         val c: Cipher = Cipher.getInstance(AES_MODE)
         c.init(

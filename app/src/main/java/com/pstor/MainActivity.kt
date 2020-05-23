@@ -9,7 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.pstor.b2.VolleyB2CredentialsClient
+import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.preferences.SecurePreference
 
 /*
@@ -20,8 +20,6 @@ Required for this application:
  */
 
 class MainActivity : AppCompatActivity() {
-    private val PREF_B2_KEY_ID = "B2_KEY_ID"
-    private val PREF_B2_KEY = "B2_KEY"
 
     private var securePreference: SecurePreference? = null
 
@@ -33,15 +31,13 @@ class MainActivity : AppCompatActivity() {
         securePreference = SecurePreference.load(this)
 
 
-        val creds = loadCredentials()
+        val creds = securePreference?.let { B2Credentials.loadFromPreferences(it) }
         if (creds != null){
             val txtKeyId = findViewById<EditText>(R.id.txtKeyId)
             txtKeyId.text = Editable.Factory.getInstance().newEditable(creds.keyId)
             val txtKey = findViewById<EditText>(R.id.txtKey)
             txtKey.text = Editable.Factory.getInstance().newEditable(creds.key)
         }
-
-
     }
 
     fun onSend(view: View) {
@@ -56,24 +52,26 @@ class MainActivity : AppCompatActivity() {
         if (creds != null) {
             btnSave.isEnabled = false
 
-            VolleyB2CredentialsClient.checkCredentials(creds, this) { response ->
-                val msg: String
-                val color: Int
-                if (response != null) {
-                    msg =  getString(R.string.settings_app_save_success, response.apiUrl)
-                    color = Color.GREEN
+            OkHttpB2CredentialsClient.checkCredentialsAsync(creds) { response ->
+                this.runOnUiThread {
+                    val msg: String
+                    val color: Int
+                    if (response != null) {
+                        msg =  getString(R.string.settings_app_save_success, response.apiUrl)
+                        color = Color.GREEN
 
-                    saveCredentials(creds)
-                } else {
-                    msg = getString(R.string.settings_app_save_fail)
-                    color = Color.RED
+                        securePreference?.let { B2Credentials.saveCredentials(it, creds) }
+                    } else {
+                        msg = getString(R.string.settings_app_save_fail)
+                        color = Color.RED
+                    }
+
+                    tvSaveResult.text = msg
+                    tvSaveResult.setTextColor(color)
+                    tvSaveResult.visibility = View.VISIBLE
+
+                    btnSave.isEnabled = true
                 }
-
-                tvSaveResult.text = msg
-                tvSaveResult.setTextColor(color)
-                tvSaveResult.visibility = View.VISIBLE
-
-                btnSave.isEnabled = true
             }
         }
     }
@@ -92,20 +90,5 @@ class MainActivity : AppCompatActivity() {
             txtKey.error = null
         }
         return B2Credentials(txtKeyId.text.toString(), txtKey.text.toString())
-    }
-
-    private fun saveCredentials(b2Credentials: B2Credentials) {
-        securePreference?.let {
-            it.put(PREF_B2_KEY_ID, b2Credentials.keyId)
-            it.put(PREF_B2_KEY, b2Credentials.key)
-        }
-    }
-
-    private fun loadCredentials(): B2Credentials? {
-        return securePreference?.let {
-            val keyId = it.get(PREF_B2_KEY_ID)
-            val key = it.get(PREF_B2_KEY)
-            return if (key != null && keyId != null) B2Credentials(keyId, key) else null
-        }
     }
 }
