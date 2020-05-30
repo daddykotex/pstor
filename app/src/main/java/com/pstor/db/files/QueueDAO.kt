@@ -1,9 +1,6 @@
 package com.pstor.db.files
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 
 @Dao
 interface QueueDAO {
@@ -21,6 +18,9 @@ interface QueueDAO {
 
     @Query("SELECT id, file_name, mime_type, size, status, sha1 FROM queue WHERE status = :status LIMIT :limit")
     fun findByStatus(status: String, limit: Int): List<Queue>
+
+    @Update
+    fun update(queue: Queue)
 
     @Insert
     fun insertAll(vararg files: Queue)

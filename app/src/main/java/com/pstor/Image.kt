@@ -13,14 +13,6 @@ object ImageUri {
     )
 }
 
-data class ImageContent(
-    val id: Long,
-    val name: String,
-    val dateAdded: Long,
-    val size: Long
-)
-
-
 enum class ImageStatus {
-    IN_QUEUE, UPLOADED, TO_BE_REMOVED
+    IN_QUEUE, UPLOADED, TO_BE_REMOVED, FAILED_TO_PROCESS
 }

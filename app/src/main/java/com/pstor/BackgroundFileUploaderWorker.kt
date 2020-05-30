@@ -64,10 +64,14 @@ class BackgroundFileUploaderWorker(appContext: Context, workerParams: WorkerPara
         Log.i(tag, "Processing with ${credentials.key}, images to process: ${queueItems.size}")
         queueItems.forEach { q ->
             val result = uploadOne(fileUrlResponse.authorizationToken, fileUrlResponse.uploadUrl, q)
-            result?.let {
-                Log.d(tag, "Upload successful of ${it.fileName} with a size of ${it.contentLength}")
+            if (result != null) {
+                Log.d(tag, "Upload successful of ${q.fileName} with a size of ${result.contentLength}")
+                val updated = q.copy(status = ImageStatus.UPLOADED.toString())
+                db.queueDAO().update(updated)
+            } else {
+                val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
+                db.queueDAO().update(updated)
             }
-
         }
 
         Log.d(tag, "Done looking up images.")
