@@ -30,6 +30,8 @@ class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParam
         val ignoreMap = ignoredList.map { i -> i.id to i.reason }.toMap()
         Log.i(tag, "Images in queue: $count, ${ignoredList.size} ignored.")
 
+        val lastId = db.queueDAO().lastId() ?: 0L
+
         val projection = arrayOf(
             MediaStore.Images.Media._ID,
             MediaStore.Images.Media.SIZE,
@@ -38,12 +40,16 @@ class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParam
         )
 
         val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} ASC"
+        // Show only videos that are at least 5 minutes in duration.
+        val selection = "${MediaStore.Images.Media._ID} >= ?"
+        val selectionArgs = arrayOf(lastId.toString())
+
 
         val query = applicationContext.contentResolver.query(
             ImageUri.ContentUriBase,
             projection,
-            null,
-            null,
+            selection,
+            selectionArgs,
             sortOrder
         )
 

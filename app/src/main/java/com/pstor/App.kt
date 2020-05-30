@@ -23,7 +23,7 @@ class App : Application(), Configuration.Provider {
         val fileScannerWorker =
             PeriodicWorkRequestBuilder<BackgroundFileScannerWorker>(15, TimeUnit.MINUTES).build()
         val fileUploaderWorker =
-            PeriodicWorkRequestBuilder<BackgroundFileUploaderWorker>(1, TimeUnit.HOURS).build()
+            PeriodicWorkRequestBuilder<BackgroundFileUploaderWorker>(30, TimeUnit.MINUTES).build()
 
         val existingWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE
 
@@ -37,6 +37,5 @@ class App : Application(), Configuration.Provider {
             existingWorkPolicy,
             fileUploaderWorker
         )
-
     }
 }
