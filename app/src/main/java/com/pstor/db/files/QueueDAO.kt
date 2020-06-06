@@ -1,11 +1,18 @@
 package com.pstor.db.files
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 
 @Dao
 interface QueueDAO {
     @Query("SELECT COUNT(id) FROM queue")
     fun count(): Long
+
+    @Query("SELECT COUNT(id) FROM queue")
+    fun obsCount(): LiveData<Long>
+
+    @Query("SELECT COUNT(id) FROM queue WHERE status = :status")
+    fun obsCountByStatus(status: String): LiveData<Long>
 
     @Query("SELECT MAX(id) FROM queue")
     fun lastId(): Long?

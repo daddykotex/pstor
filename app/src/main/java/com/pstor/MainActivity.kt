@@ -5,11 +5,13 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.room.Room
 import com.pstor.b2.OkHttpB2CredentialsClient
+import com.pstor.db.PStorDatabase
 import com.pstor.preferences.SecurePreference
 
 /*
@@ -22,7 +24,6 @@ Required for this application:
 class MainActivity : AppCompatActivity() {
 
     private var securePreference: SecurePreference? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +39,39 @@ class MainActivity : AppCompatActivity() {
             val txtKey = findViewById<EditText>(R.id.txtKey)
             txtKey.text = Editable.Factory.getInstance().newEditable(creds.key)
         }
+
+        val tableLayout = findViewById<TableLayout>(R.id.tblStats)
+        val db: PStorDatabase = Room.databaseBuilder(
+            this,
+            PStorDatabase::class.java, "pstor-database"
+        ).build()
+        buildStats(tableLayout, db)
+    }
+
+    private fun buildStats(tbl: TableLayout, db: PStorDatabase) {
+        fun <T> addRow(title: String, data: LiveData<T>, convert: (T) -> String) {
+            val titleCol = TextView(this)
+            titleCol.text = title
+
+            val valueCol = TextView(this)
+            valueCol.text = "N/A"
+            val valueObserver = Observer<T> { value ->
+                valueCol.text = convert(value)
+            }
+            data.observe(this, valueObserver)
+
+
+            val row = TableRow(this)
+            row.addView(titleCol)
+            row.addView(valueCol)
+
+            tbl.addView(row)
+        }
+
+        //title column
+        tbl.setColumnStretchable(0, true)
+        addRow(getString(R.string.settings_app_stats_count_scanned), db.queueDAO().obsCount()) { it.toString() }
+        addRow(getString(R.string.settings_app_stats_count_uploaded), db.queueDAO().obsCountByStatus(ImageStatus.UPLOADED.toString())) { it.toString() }
     }
 
     fun onSend(view: View) {
