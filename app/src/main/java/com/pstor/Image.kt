@@ -5,7 +5,7 @@ import android.net.Uri
 import android.provider.MediaStore
 
 object ImageUri {
-    val ContentUriBase = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    val ContentUriBase: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
     fun contentUri(id: Long): Uri = ContentUris.withAppendedId(
         ContentUriBase,

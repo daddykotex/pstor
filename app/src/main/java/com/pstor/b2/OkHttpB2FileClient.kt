@@ -22,8 +22,8 @@ object OkHttpB2FileClient {
         return "$baseUrl/b2api/v2/$path"
     }
 
-    fun getUploadUrl(authorization: B2AccountAuthorization): B2UploadUrlResponse? {
-        val body = B2GetUploadUrlRequest.builder("22a0f5be0bdc74507c170819").build()
+    fun getUploadUrl(authorization: B2AccountAuthorization, bucketId: String): B2UploadUrlResponse? {
+        val body = B2GetUploadUrlRequest.builder(bucketId).build()
         val request = Request.Builder()
             .url(buildUrl(authorization.apiUrl, "b2_get_upload_url"))
             .post(B2Json.toJsonOrThrowRuntime(body).toRequestBody(OkHttpUtils.JsonMediaType))

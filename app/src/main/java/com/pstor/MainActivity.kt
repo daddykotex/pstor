@@ -7,12 +7,15 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.room.Room
 import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.db.PStorDatabase
+import com.pstor.preferences.Keys
 import com.pstor.preferences.SecurePreference
+import kotlinx.android.synthetic.main.activity_main.*
 
 /*
 Required for this application:
@@ -33,11 +36,16 @@ class MainActivity : AppCompatActivity() {
 
 
         val creds = securePreference?.let { B2Credentials.loadFromPreferences(it) }
-        if (creds != null){
+        creds?.let {
             val txtKeyId = findViewById<EditText>(R.id.txtKeyId)
-            txtKeyId.text = Editable.Factory.getInstance().newEditable(creds.keyId)
+            txtKeyId.text = Editable.Factory.getInstance().newEditable(it.keyId)
             val txtKey = findViewById<EditText>(R.id.txtKey)
-            txtKey.text = Editable.Factory.getInstance().newEditable(creds.key)
+            txtKey.text = Editable.Factory.getInstance().newEditable(it.key)
+        }
+        val bId = securePreference?.let { it.get(Keys.BucketId) }
+        bId?.let {
+            val txtBucketId = findViewById<EditText>(R.id.txtBucketId)
+            txtBucketId.text = Editable.Factory.getInstance().newEditable(it)
         }
 
         val tableLayout = findViewById<TableLayout>(R.id.tblStats)
@@ -74,9 +82,20 @@ class MainActivity : AppCompatActivity() {
         addRow(getString(R.string.settings_app_stats_count_uploaded), db.queueDAO().obsCountByStatus(ImageStatus.UPLOADED.toString())) { it.toString() }
     }
 
+    private fun ensurePermissions() {
+        if (!Permissions.checkAllPermissions(this)) {
+            ActivityCompat.requestPermissions(
+                this,
+                Permissions.permissionsToRequest,
+                Permissions.REQUEST_CODE_PERMISSIONS
+            )
+        }
+    }
+
     fun onSend(view: View) {
         val txtKeyId = findViewById<EditText>(R.id.txtKeyId)
         val txtKey = findViewById<EditText>(R.id.txtKey)
+        val txtBucketId = findViewById<EditText>(R.id.txtBucketId)
         val btnSave = findViewById<Button>(R.id.btnSave)
 
         val tvSaveResult = findViewById<TextView>(R.id.tvSaveResult)
@@ -94,7 +113,11 @@ class MainActivity : AppCompatActivity() {
                         msg =  getString(R.string.settings_app_save_success, response.apiUrl)
                         color = Color.GREEN
 
-                        securePreference?.let { B2Credentials.saveCredentials(it, creds) }
+                        securePreference?.let {
+                            B2Credentials.saveCredentials(it, creds)
+                            it.put(Keys.BucketId, txtBucketId.text.toString())
+
+                        }
                     } else {
                         msg = getString(R.string.settings_app_save_fail)
                         color = Color.RED

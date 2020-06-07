@@ -17,6 +17,7 @@ import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.b2.OkHttpB2FileClient
 import com.pstor.db.PStorDatabase
 import com.pstor.db.files.Queue
+import com.pstor.preferences.Keys
 import com.pstor.preferences.SecurePreference
 import com.pstor.utils.Either
 import okio.source
@@ -44,6 +45,14 @@ class BackgroundFileUploaderWorker(appContext: Context, workerParams: WorkerPara
                 ).build()
             )
 
+        val bucketId =
+            securePreference.get(Keys.BucketId) ?: return Result.failure(
+                Data.Builder().putString(
+                    "error",
+                    "bucket it unavailable"
+                ).build()
+            )
+
         val auth: B2AccountAuthorization
         when (val maybeAuth = getAuth(credentials)) {
             is Either.Left -> return maybeAuth.left
@@ -52,7 +61,7 @@ class BackgroundFileUploaderWorker(appContext: Context, workerParams: WorkerPara
         Log.i(tag, "Authorized.")
 
 
-        val maybeFileUrl = getFileUrl(auth)
+        val maybeFileUrl = getFileUrl(auth, bucketId)
         val fileUrlResponse: B2UploadUrlResponse
         when (maybeFileUrl) {
             is Either.Left -> return maybeFileUrl.left
@@ -178,9 +187,9 @@ class BackgroundFileUploaderWorker(appContext: Context, workerParams: WorkerPara
         }
     }
 
-    private fun getFileUrl(auth: B2AccountAuthorization): Either<Result, B2UploadUrlResponse> {
+    private fun getFileUrl(auth: B2AccountAuthorization, bucketId: String): Either<Result, B2UploadUrlResponse> {
         fun fetchFileURL(): Either<Result, B2UploadUrlResponse> {
-            return safeRequest { OkHttpB2FileClient.getUploadUrl(auth) }
+            return safeRequest { OkHttpB2FileClient.getUploadUrl(auth, bucketId) }
         }
 
         val decode: (String) -> Either<Result, ExpiringFileUrl> =

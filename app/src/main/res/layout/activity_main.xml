@@ -7,15 +7,37 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/tvKeyId"
+        android:id="@+id/tvBucketId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/settings_app_key_id_txt"
-        app:layout_constraintBottom_toTopOf="@+id/txtKeyId"
+        android:text="@string/settings_app_bucket_id_txt"
+        app:layout_constraintBottom_toTopOf="@+id/txtBucketId"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/txtBucketId"
+        android:layout_width="379dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:autofillHints="@string/settings_app_bucket_id_txt"
+        android:ems="10"
+        android:inputType="textShortMessage|none"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBucketId" />
+
+    <TextView
+        android:id="@+id/tvKeyId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/settings_app_key_id_txt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtBucketId" />
 
     <EditText
         android:id="@+id/txtKeyId"
