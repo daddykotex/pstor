@@ -22,7 +22,7 @@ import com.pstor.preferences.SecurePreference
 import com.pstor.utils.Either
 import okio.source
 
-class BackgroundFileUploaderWorker(appContext: Context, workerParams: WorkerParameters) :
+class BackgroundFileUploaderWorker(val appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
     private val tag = this.javaClass.simpleName
 
@@ -35,6 +35,16 @@ class BackgroundFileUploaderWorker(appContext: Context, workerParams: WorkerPara
 
     override fun doWork(): Result {
         Log.i(tag, "Starting work.")
+
+        Log.i(tag, "Checking permissions.")
+        if (Permissions.checkAllPermissions(appContext)) {
+            return Result.failure(
+                Data.Builder().putString(
+                    "error",
+                    "not all permissions"
+                ).build()
+            )
+        }
 
         Log.i(tag, "Checking credentials to B2")
         val credentials =

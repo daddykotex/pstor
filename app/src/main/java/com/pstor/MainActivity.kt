@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         securePreference = SecurePreference.load(this)
 
+        ensurePermissions()
 
         val creds = securePreference?.let { B2Credentials.loadFromPreferences(it) }
         creds?.let {
