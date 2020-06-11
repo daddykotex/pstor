@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +16,6 @@ import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.db.PStorDatabase
 import com.pstor.preferences.Keys
 import com.pstor.preferences.SecurePreference
-import kotlinx.android.synthetic.main.activity_main.*
 
 /*
 Required for this application:
@@ -27,10 +27,13 @@ Required for this application:
 class MainActivity : AppCompatActivity() {
 
     private var securePreference: SecurePreference? = null
+    private val tag = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        Log.i(tag, "onCreate")
 
         securePreference = SecurePreference.load(this)
 
@@ -82,6 +85,8 @@ class MainActivity : AppCompatActivity() {
         addRow(getString(R.string.settings_app_stats_count_scanned), db.queueDAO().obsCount()) { it.toString() }
         addRow(getString(R.string.settings_app_stats_count_uploaded), db.queueDAO().obsCountByStatus(ImageStatus.UPLOADED.toString())) { it.toString() }
     }
+
+
 
     private fun ensurePermissions() {
         if (!Permissions.checkAllPermissions(this)) {

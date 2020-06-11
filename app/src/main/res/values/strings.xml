@@ -19,4 +19,9 @@
 
     <string name="common_errors_empty">Please enter a value</string>
     <string name="common_laoding">Loading</string>
+
+    <string name="notitication_channel_name">PStor notification channel</string>
+    <string name="notitication_channel_description">This channel is used to transmit notification around uploads.</string>
+    <string name="notitication_progress_title">Uploading in progress</string>
+    <string name="notitication_progress_description">Uploading %1$d out of %2$d</string>
 </resources>

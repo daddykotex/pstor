@@ -1,8 +1,11 @@
 package com.pstor
 
+import android.app.Notification
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.room.Room
 import androidx.work.Data
 import androidx.work.Worker
@@ -13,6 +16,8 @@ import com.backblaze.b2.client.structures.B2UploadUrlResponse
 import com.backblaze.b2.json.B2Json
 import com.backblaze.b2.json.B2Json.constructor
 import com.backblaze.b2.json.B2Json.required
+import com.pstor.App.Companion.Notification.ChannelId
+import com.pstor.App.Companion.Notification.ProgressNotificationId
 import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.b2.OkHttpB2FileClient
 import com.pstor.db.PStorDatabase
@@ -22,7 +27,7 @@ import com.pstor.preferences.SecurePreference
 import com.pstor.utils.Either
 import okio.source
 
-class BackgroundFileUploaderWorker(val appContext: Context, workerParams: WorkerParameters) :
+class BackgroundFileUploaderWorker(private val appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
     private val tag = this.javaClass.simpleName
 
@@ -37,7 +42,7 @@ class BackgroundFileUploaderWorker(val appContext: Context, workerParams: Worker
         Log.i(tag, "Starting work.")
 
         Log.i(tag, "Checking permissions.")
-        if (Permissions.checkAllPermissions(appContext)) {
+        if (!Permissions.checkAllPermissions(appContext)) {
             return Result.failure(
                 Data.Builder().putString(
                     "error",
@@ -59,7 +64,7 @@ class BackgroundFileUploaderWorker(val appContext: Context, workerParams: Worker
             securePreference.get(Keys.BucketId) ?: return Result.failure(
                 Data.Builder().putString(
                     "error",
-                    "bucket it unavailable"
+                    "bucket id unavailable"
                 ).build()
             )
 
@@ -81,16 +86,41 @@ class BackgroundFileUploaderWorker(val appContext: Context, workerParams: Worker
 
         val queueItems = db.queueDAO().findByStatus(ImageStatus.IN_QUEUE.toString(), 20)
         Log.i(tag, "Processing with ${credentials.key}, images to process: ${queueItems.size}")
-        queueItems.forEach { q ->
-            val result = uploadOne(fileUrlResponse.authorizationToken, fileUrlResponse.uploadUrl, q)
-            if (result != null) {
-                Log.d(tag, "Upload successful of ${q.fileName} with a size of ${result.contentLength}")
-                val updated = q.copy(status = ImageStatus.UPLOADED.toString())
-                db.queueDAO().update(updated)
-            } else {
+
+        with(NotificationManagerCompat.from(appContext)) {
+            notify(ProgressNotificationId, buildNotification(0, queueItems.size))
+        }
+
+        queueItems.forEachIndexed { index, q ->
+            try {
+                val result =
+                    uploadOne(fileUrlResponse.authorizationToken, fileUrlResponse.uploadUrl, q)
+
+                with(NotificationManagerCompat.from(appContext)) {
+                    notify(ProgressNotificationId, buildNotification(index, queueItems.size))
+                }
+
+                if (result != null) {
+                    Log.d(
+                        tag,
+                        "Upload successful of ${q.fileName} with a size of ${result.contentLength}"
+                    )
+                    val updated = q.copy(status = ImageStatus.UPLOADED.toString())
+                    db.queueDAO().update(updated)
+                } else {
+                    val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
+                    db.queueDAO().update(updated)
+                }
+            } catch (ex: Throwable) {
                 val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
+                Log.e(tag, "Could not upload.", ex)
                 db.queueDAO().update(updated)
+                throw ex
             }
+        }
+
+        with(NotificationManagerCompat.from(appContext)) {
+            cancel(ProgressNotificationId)
         }
 
         Log.d(tag, "Done looking up images.")
@@ -123,6 +153,15 @@ class BackgroundFileUploaderWorker(val appContext: Context, workerParams: Worker
             )
         }
 
+    }
+
+    private fun buildNotification(current: Int, total: Int): Notification {
+        return NotificationCompat.Builder(appContext, ChannelId)
+            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setContentTitle(appContext.getString(R.string.notitication_progress_title))
+            .setContentText(appContext.getString(R.string.notitication_progress_description, current, total))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
     }
 
     private fun <T> safeRequest(

@@ -1,15 +1,17 @@
 package com.pstor
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.util.Log
 import androidx.work.*
+import com.pstor.App.Companion.Notification.ChannelId
 import java.util.concurrent.TimeUnit
 
 
-/**
- * The [Application]. Responsible for initializing [WorkManager] in [Log.VERBOSE] mode.
- */
 class App : Application(), Configuration.Provider {
+
     override fun getWorkManagerConfiguration() =
         Configuration.Builder()
             .setMinimumLoggingLevel(Log.VERBOSE)
@@ -18,12 +20,20 @@ class App : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-        Log.d("Pstor", "onCreate called")
-
+        val constraints =
+            Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.UNMETERED)
+                .setRequiresBatteryNotLow(true)
+                .setRequiresDeviceIdle(true)
+                .build()
         val fileScannerWorker =
-            PeriodicWorkRequestBuilder<BackgroundFileScannerWorker>(15, TimeUnit.MINUTES).build()
+            PeriodicWorkRequestBuilder<BackgroundFileScannerWorker>(15, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .build()
         val fileUploaderWorker =
-            PeriodicWorkRequestBuilder<BackgroundFileUploaderWorker>(30, TimeUnit.MINUTES).build()
+            PeriodicWorkRequestBuilder<BackgroundFileUploaderWorker>(30, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .build()
 
         val existingWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE
 
@@ -37,5 +47,30 @@ class App : Application(), Configuration.Provider {
             existingWorkPolicy,
             fileUploaderWorker
         )
+
+        createNotificationChannel()
+    }
+
+
+    private fun createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        val name = this.getString(R.string.notitication_channel_name)
+        val descriptionText = this.getString(R.string.notitication_channel_description)
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(ChannelId, name, importance).apply {
+            description = descriptionText
+        }
+        // Register the channel with the system
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    companion object {
+        object Notification {
+            const val ChannelId = "com.pstor"
+            const val ProgressNotificationId = 150
+        }
     }
 }
