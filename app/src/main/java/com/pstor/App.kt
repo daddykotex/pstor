@@ -24,7 +24,6 @@ class App : Application(), Configuration.Provider {
             Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.UNMETERED)
                 .setRequiresBatteryNotLow(true)
-                .setRequiresDeviceIdle(true)
                 .build()
         val fileScannerWorker =
             PeriodicWorkRequestBuilder<BackgroundFileScannerWorker>(15, TimeUnit.MINUTES)

@@ -38,6 +38,13 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
 
     private val securePreference: SecurePreference = SecurePreference.load(appContext)
 
+    override fun onStopped() {
+        super.onStopped()
+        with(NotificationManagerCompat.from(appContext)) {
+            cancel(ProgressNotificationId)
+        }
+    }
+
     override fun doWork(): Result {
         Log.i(tag, "Starting work.")
 
