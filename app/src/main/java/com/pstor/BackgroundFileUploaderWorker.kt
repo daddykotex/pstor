@@ -164,7 +164,7 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
 
     private fun buildNotification(current: Int, total: Int): Notification {
         return NotificationCompat.Builder(appContext, ChannelId)
-            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setSmallIcon(R.mipmap.pstor_launcher)
             .setContentTitle(appContext.getString(R.string.notitication_progress_title))
             .setContentText(appContext.getString(R.string.notitication_progress_description, current, total))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

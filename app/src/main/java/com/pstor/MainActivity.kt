@@ -27,6 +27,8 @@ Required for this application:
 class MainActivity : AppCompatActivity() {
 
     private var securePreference: SecurePreference? = null
+    private var db: PStorDatabase? = null
+
     private val tag = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,11 +55,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         val tableLayout = findViewById<TableLayout>(R.id.tblStats)
-        val db: PStorDatabase = Room.databaseBuilder(
+        db = Room.databaseBuilder(
             this,
             PStorDatabase::class.java, "pstor-database"
         ).build()
-        buildStats(tableLayout, db)
+
+        db?.let { buildStats(tableLayout, it) }
+    }
+
+    override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
+        super.onTopResumedActivityChanged(isTopResumedActivity)
+        if (isTopResumedActivity) {
+            val tableLayout = findViewById<TableLayout>(R.id.tblStats)
+            db?.let { buildStats(tableLayout, it) }
+        }
     }
 
     private fun buildStats(tbl: TableLayout, db: PStorDatabase) {
@@ -81,6 +92,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         //title column
+        tbl.removeAllViews()
         tbl.setColumnStretchable(0, true)
         addRow(getString(R.string.settings_app_stats_count_scanned), db.queueDAO().obsCount()) { it.toString() }
         addRow(getString(R.string.settings_app_stats_count_uploaded), db.queueDAO().obsCountByStatus(ImageStatus.UPLOADED.toString())) { it.toString() }
