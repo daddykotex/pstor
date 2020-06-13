@@ -11,6 +11,7 @@
     <string name="settings_app_stats_txt">Statistics</string>
     <string name="settings_app_stats_count_scanned">File scanned</string>
     <string name="settings_app_stats_count_uploaded">File uploaded</string>
+    <string name="settings_app_stats_count_error">Files in error</string>
 
 
     <string name="settings_app_save_success">The credentials are valid. The API url is %1$s</string>

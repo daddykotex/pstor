@@ -26,6 +26,7 @@ import com.pstor.preferences.Keys
 import com.pstor.preferences.SecurePreference
 import com.pstor.utils.Either
 import okio.source
+import java.io.FileNotFoundException
 
 class BackgroundFileUploaderWorker(private val appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
@@ -118,6 +119,10 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
                     val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
                     db.queueDAO().update(updated)
                 }
+            } catch (ex: FileNotFoundException) {
+                val updated = q.copy(status = ImageStatus.FILE_NOT_FOUND.toString())
+                Log.w(tag, "File missing.", ex)
+                db.queueDAO().update(updated)
             } catch (ex: Throwable) {
                 val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
                 Log.e(tag, "Could not upload.", ex)

@@ -96,6 +96,7 @@ class MainActivity : AppCompatActivity() {
         tbl.setColumnStretchable(0, true)
         addRow(getString(R.string.settings_app_stats_count_scanned), db.queueDAO().obsCount()) { it.toString() }
         addRow(getString(R.string.settings_app_stats_count_uploaded), db.queueDAO().obsCountByStatus(ImageStatus.UPLOADED.toString())) { it.toString() }
+        addRow(getString(R.string.settings_app_stats_count_error), db.queueDAO().obsCountByStatus(ImageStatus.FAILED_TO_PROCESS.toString())) { it.toString() }
     }
 
 
