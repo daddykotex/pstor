@@ -122,7 +122,6 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
                 val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
                 Log.e(tag, "Could not upload.", ex)
                 db.queueDAO().update(updated)
-                throw ex
             }
         }
 
