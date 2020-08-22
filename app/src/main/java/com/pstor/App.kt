@@ -30,7 +30,7 @@ class App : Application(), Configuration.Provider {
                 .setConstraints(constraints)
                 .build()
         val fileUploaderWorker =
-            PeriodicWorkRequestBuilder<BackgroundFileUploaderWorker>(30, TimeUnit.MINUTES)
+            PeriodicWorkRequestBuilder<BackgroundFileUploaderWorker>(20, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .build()
 
