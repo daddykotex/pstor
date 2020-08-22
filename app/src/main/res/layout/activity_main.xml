@@ -6,71 +6,89 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/top_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="16dp" />
+
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/start_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="16dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/end_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="16dp" />
+
     <TextView
         android:id="@+id/tvBucketId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
         android:text="@string/settings_app_bucket_id_txt"
         app:layout_constraintBottom_toTopOf="@+id/txtBucketId"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="@+id/start_guideline"
+        app:layout_constraintTop_toTopOf="@+id/top_guideline" />
 
     <EditText
         android:id="@+id/txtBucketId"
         android:layout_width="379dp"
         android:layout_height="55dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:autofillHints="@string/settings_app_bucket_id_txt"
         android:ems="10"
         android:inputType="textShortMessage|none"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/start_guideline"
+        app:layout_constraintEnd_toStartOf="@+id/end_guideline"
         app:layout_constraintTop_toBottomOf="@+id/tvBucketId" />
 
     <TextView
         android:id="@+id/tvKeyId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="@string/settings_app_key_id_txt"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/start_guideline"
         app:layout_constraintTop_toBottomOf="@+id/txtBucketId" />
 
     <EditText
         android:id="@+id/txtKeyId"
         android:layout_width="379dp"
         android:layout_height="55dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:autofillHints="@string/settings_app_key_id_txt"
         android:ems="10"
         android:inputType="textShortMessage|none"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/start_guideline"
+        app:layout_constraintEnd_toStartOf="@+id/end_guideline"
         app:layout_constraintTop_toBottomOf="@+id/tvKeyId" />
 
     <TextView
         android:id="@+id/tvKey"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="64dp"
         android:text="@string/settings_app_key_txt"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/start_guideline"
         app:layout_constraintTop_toBottomOf="@+id/txtKeyId" />
 
     <EditText
         android:id="@+id/txtKey"
         android:layout_width="379dp"
         android:layout_height="55dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:autofillHints="@string/settings_app_key_txt"
         android:ems="10"
         android:inputType="textPassword"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/start_guideline"
+        app:layout_constraintEnd_toStartOf="@+id/end_guideline"
         app:layout_constraintTop_toBottomOf="@+id/tvKey" />
 
     <Button
@@ -78,45 +96,42 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
         android:onClick="onSend"
         android:text="@string/settings_app_save_btn"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/start_guideline"
+        app:layout_constraintEnd_toStartOf="@+id/end_guideline"
         app:layout_constraintTop_toBottomOf="@+id/txtKey" />
 
     <TextView
         android:id="@+id/tvSaveResult"
         android:layout_width="273dp"
         android:layout_height="38dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="@string/settings_app_save_success"
         android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/start_guideline"
+        app:layout_constraintEnd_toStartOf="@+id/btnSave"
         app:layout_constraintTop_toBottomOf="@+id/txtKey" />
 
     <TextView
         android:id="@+id/string"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:text="@string/settings_app_stats_txt"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/start_guideline"
         app:layout_constraintTop_toBottomOf="@+id/btnSave" />
 
     <TableLayout
         android:id="@+id/tblStats"
-        android:layout_width="400dp"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/end_guideline"
+        app:layout_constraintStart_toStartOf="@id/start_guideline"
         app:layout_constraintTop_toBottomOf="@+id/string" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
