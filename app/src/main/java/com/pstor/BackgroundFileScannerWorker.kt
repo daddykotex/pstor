@@ -40,7 +40,6 @@ class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParam
         )
 
         val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} ASC"
-        // Show only videos that are at least 5 minutes in duration.
         val selection = "${MediaStore.Images.Media._ID} >= ?"
         val selectionArgs = arrayOf(lastId.toString())
 

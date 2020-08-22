@@ -92,7 +92,7 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
         }
         Log.i(tag, "Successfully retrieved an URL to start uploading: ${fileUrlResponse.uploadUrl}")
 
-        val queueItems = db.queueDAO().findByStatus(ImageStatus.IN_QUEUE.toString(), 100)
+        val queueItems = db.queueDAO().findByStatus(ImageStatus.IN_QUEUE.toString(), 50)
         Log.i(tag, "Processing with ${credentials.key}, images to process: ${queueItems.size}")
 
         with(NotificationManagerCompat.from(appContext)) {
