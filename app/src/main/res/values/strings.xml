@@ -5,8 +5,10 @@
     <string name="settings_app_key_errors_empty">Please enter a value</string>
     <string name="settings_app_key_id_txt">Enter your B2 App Key ID</string>
     <string name="settings_app_key_id_errors_empty">Please enter a value</string>
+    <string name="settings_app_scan_btn">Scan QR</string>
     <string name="settings_app_save_btn">Save</string>
 
+    <string name="barcode_app_cancel_btn">Cancel</string>
 
     <string name="settings_app_stats_txt">Statistics</string>
     <string name="settings_app_stats_count_scanned">File scanned</string>

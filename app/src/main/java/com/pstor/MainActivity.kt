@@ -1,5 +1,6 @@
 package com.pstor
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
@@ -12,6 +13,8 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.room.Room
+import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.android.gms.vision.barcode.Barcode
 import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.db.PStorDatabase
 import com.pstor.preferences.Keys
@@ -106,7 +109,7 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this,
                 Permissions.permissionsToRequest,
-                Permissions.REQUEST_CODE_PERMISSIONS
+                Permissions.RC_REQUIRED_PERMISSIONS
             )
         }
     }
@@ -166,5 +169,29 @@ class MainActivity : AppCompatActivity() {
             txtKey.error = null
         }
         return B2Credentials(txtKeyId.text.toString(), txtKey.text.toString())
+    }
+
+    fun startScan(view: View) {
+        val intent = Intent(this, BarcodeCaptureActivity::class.java)
+        startActivityForResult(intent, RC_BARCODE_CAPTURE)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == RC_BARCODE_CAPTURE && resultCode == CommonStatusCodes.SUCCESS) {
+            Log.d(tag, "Successfully returning from barcode scanning.")
+            if (data != null) {
+                val barcode: Barcode? = data.getParcelableExtra(BarcodeCaptureActivity.BARCODE_OBJECT)
+                barcode?.let { Log.d(tag, "Barcode read: " + it.displayValue) }
+            } else {
+                Log.d(tag, "No barcode captured, intent data is null")
+            }
+        } else {
+            Log.d(tag, "Capturing barcode failed.")
+        }
+    }
+
+    companion object {
+        const val RC_BARCODE_CAPTURE = 9001
     }
 }
