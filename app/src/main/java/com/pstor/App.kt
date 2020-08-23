@@ -27,10 +27,12 @@ class App : Application(), Configuration.Provider {
                 .build()
         val fileScannerWorker =
             PeriodicWorkRequestBuilder<BackgroundFileScannerWorker>(15, TimeUnit.MINUTES)
+                .setInitialDelay(1, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .build()
         val fileUploaderWorker =
             PeriodicWorkRequestBuilder<BackgroundFileUploaderWorker>(20, TimeUnit.MINUTES)
+                .setInitialDelay(1, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .build()
 
