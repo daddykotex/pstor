@@ -40,6 +40,8 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.7.2"
     implementation 'com.backblaze.b2:b2-sdk-core:3.1.0'
     implementation "commons-codec:commons-codec:1.14" //sha1
+
+    //scan
     implementation 'com.google.android.gms:play-services-vision:20.1.1'
 
     def room_version = "2.2.5"
