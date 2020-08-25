@@ -1,5 +1,6 @@
 package com.pstor
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -19,6 +20,7 @@ import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.db.PStorDatabase
 import com.pstor.preferences.Keys
 import com.pstor.preferences.SecurePreference
+
 
 /*
 Required for this application:
@@ -182,12 +184,42 @@ class MainActivity : AppCompatActivity() {
             Log.d(tag, "Successfully returning from barcode scanning.")
             if (data != null) {
                 val barcode: Barcode? = data.getParcelableExtra(BarcodeCaptureActivity.BARCODE_OBJECT)
-                barcode?.let { Log.d(tag, "Barcode read: " + it.displayValue) }
+                barcode?.let {
+                    Log.d(tag, "Barcode read correctly")
+                    validateBarcode(it.rawValue).let {
+                        askAndApplySettings()
+                    }
+                }
             } else {
                 Log.d(tag, "No barcode captured, intent data is null")
             }
         } else {
             Log.d(tag, "Capturing barcode failed.")
+        }
+    }
+
+    private fun askAndApplySettings(bucketId: String, credentials: B2Credentials) {
+        AlertDialog.Builder(this)
+            .setTitle("Title")
+            .setMessage("Do you really want to whatever?")
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.yes
+            ) { dialog, whichButton ->
+                Toast.makeText(this, "Yaay", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(android.R.string.no, null).show()
+    }
+
+    private fun validateBarcode(barcode: String): Pair<String, B2Credentials>? {
+        val parts = barcode.split("||")
+        val id = parts.elementAtOrNull(0)
+        val keyId = parts.elementAtOrNull(1)
+        val key = parts.elementAtOrNull(2)
+
+        return if (id != null && keyId != null && key != null) {
+            id to B2Credentials(keyId, key)
+        } else {
+            null
         }
     }
 
