@@ -95,43 +95,55 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
         val queueItems = db.queueDAO().findByStatus(ImageStatus.IN_QUEUE.toString(), 50)
         Log.i(tag, "Processing with ${credentials.key}, images to process: ${queueItems.size}")
 
-        with(NotificationManagerCompat.from(appContext)) {
-            notify(ProgressNotificationId, buildNotification(0, queueItems.size))
-        }
 
-        queueItems.forEachIndexed { index, q ->
-            try {
-                val result =
-                    uploadOne(fileUrlResponse.authorizationToken, fileUrlResponse.uploadUrl, q)
+        fun upload(queue: List<Queue>) {
+            with(NotificationManagerCompat.from(appContext)) {
+                notify(ProgressNotificationId, buildNotification(0, queue.size))
+            }
 
-                with(NotificationManagerCompat.from(appContext)) {
-                    notify(ProgressNotificationId, buildNotification(index, queueItems.size))
-                }
+            queue.forEachIndexed { index, q ->
+                try {
+                    val result =
+                        uploadOne(fileUrlResponse.authorizationToken, fileUrlResponse.uploadUrl, q)
 
-                if (result != null) {
-                    Log.d(
-                        tag,
-                        "Upload successful of ${q.fileName} with a size of ${result.contentLength}"
-                    )
-                    val updated = q.copy(status = ImageStatus.UPLOADED.toString())
+                    with(NotificationManagerCompat.from(appContext)) {
+                        notify(ProgressNotificationId, buildNotification(index, queue.size))
+                    }
+
+                    if (result != null) {
+                        Log.d(
+                            tag,
+                            "Upload successful of ${q.fileName} with a size of ${result.contentLength}"
+                        )
+                        val updated = q.copy(status = ImageStatus.UPLOADED.toString())
+                        db.queueDAO().update(updated)
+                    } else {
+                        val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
+                        db.queueDAO().update(updated)
+                    }
+                } catch (ex: FileNotFoundException) {
+                    val updated = q.copy(status = ImageStatus.FILE_NOT_FOUND.toString())
+                    Log.w(tag, "File missing.", ex)
                     db.queueDAO().update(updated)
-                } else {
+                } catch (ex: Throwable) {
                     val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
+                    Log.e(tag, "Could not upload.", ex)
                     db.queueDAO().update(updated)
                 }
-            } catch (ex: FileNotFoundException) {
-                val updated = q.copy(status = ImageStatus.FILE_NOT_FOUND.toString())
-                Log.w(tag, "File missing.", ex)
-                db.queueDAO().update(updated)
-            } catch (ex: Throwable) {
-                val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
-                Log.e(tag, "Could not upload.", ex)
-                db.queueDAO().update(updated)
+            }
+
+            with(NotificationManagerCompat.from(appContext)) {
+                cancel(ProgressNotificationId)
             }
         }
 
-        with(NotificationManagerCompat.from(appContext)) {
-            cancel(ProgressNotificationId)
+        if (queueItems.isEmpty()) {
+            val errorItems = db.queueDAO().findByStatus(ImageStatus.FAILED_TO_PROCESS.toString(), 50)
+            Log.i(tag, "Processing with ${credentials.key}, images to in error: ${errorItems.size}")
+
+            upload(errorItems)
+        } else {
+            upload(queueItems)
         }
 
         Log.d(tag, "Done looking up images.")
@@ -149,19 +161,19 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
         if (ins == null) {
             Log.d(tag, "File content not available.")
             return null
-        }
-
-        Log.d(tag, "Ready to upload $contentUri.")
-        return ins.source().use { stream ->
-            return OkHttpB2FileClient.uploadFile(
-                fileAuthToken,
-                uploadUrl,
-                q.fileName,
-                q.mimeType,
-                q.sha1,
-                q.size,
-                stream
-            )
+        } else {
+            Log.d(tag, "Ready to upload $contentUri.")
+            return ins.source().use { stream ->
+                return OkHttpB2FileClient.uploadFile(
+                    fileAuthToken,
+                    uploadUrl,
+                    q.fileName,
+                    q.mimeType,
+                    q.sha1,
+                    q.size,
+                    stream
+                )
+            }
         }
 
     }
