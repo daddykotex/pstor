@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.room.Room
 import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.db.PStorDatabase
 import com.pstor.preferences.Keys
@@ -55,13 +54,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val tableLayout = findViewById<TableLayout>(R.id.tblStats)
-        db = Room.databaseBuilder(
-            this,
-            PStorDatabase::class.java, "pstor-database"
-        ).build()
-
-        db?.let { buildStats(tableLayout, it) }
-    }
+        db = PStorDatabase.getDatabase(this)
 
     override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
         super.onTopResumedActivityChanged(isTopResumedActivity)

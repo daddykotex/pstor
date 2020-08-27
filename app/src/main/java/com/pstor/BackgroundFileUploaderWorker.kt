@@ -32,10 +32,7 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
     Worker(appContext, workerParams) {
     private val tag = this.javaClass.simpleName
 
-    private val db: PStorDatabase = Room.databaseBuilder(
-        applicationContext,
-        PStorDatabase::class.java, "pstor-database"
-    ).build()
+    private val db: PStorDatabase = PStorDatabase.getDatabase(appContext)
 
     private val securePreference: SecurePreference = SecurePreference.load(appContext)
 

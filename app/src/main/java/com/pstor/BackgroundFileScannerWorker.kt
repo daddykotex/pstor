@@ -3,7 +3,6 @@ package com.pstor
 import android.content.Context
 import android.provider.MediaStore
 import android.util.Log
-import androidx.room.Room
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.pstor.db.PStorDatabase
@@ -17,10 +16,7 @@ class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParam
 
     private val tag = "BackgroundFileScannerWorker"
 
-    private val db: PStorDatabase = Room.databaseBuilder(
-        applicationContext,
-        PStorDatabase::class.java, "pstor-database"
-    ).build()
+    private val db: PStorDatabase = PStorDatabase.getDatabase(appContext)
 
     override fun doWork(): Result {
         Log.i(tag, "Starting work.")
