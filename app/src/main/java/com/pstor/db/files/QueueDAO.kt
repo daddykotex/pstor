@@ -17,17 +17,17 @@ interface QueueDAO {
     @Query("SELECT MAX(id) FROM queue")
     fun lastId(): Long?
 
-    @Query("SELECT id, file_name, mime_type, size, status, sha1 FROM queue ORDER BY id")
+    @Query("SELECT id, file_name, mime_type, size, status, sha1, attempt_count FROM queue ORDER BY id")
     fun getAll(): List<Queue>
 
-    @Query("SELECT id, file_name, mime_type, size, status, sha1 FROM queue WHERE id IN (:ids) ORDER BY id")
+    @Query("SELECT id, file_name, mime_type, size, status, sha1, attempt_count FROM queue WHERE id IN (:ids) ORDER BY id")
     fun loadAllByIds(ids: Array<Long>): List<Queue>
 
-    @Query("SELECT id, file_name, mime_type, size, status, sha1 FROM queue WHERE id = :id")
+    @Query("SELECT id, file_name, mime_type, size, status, sha1, attempt_count FROM queue WHERE id = :id")
     fun loadById(id: Long): Queue?
 
-    @Query("SELECT id, file_name, mime_type, size, status, sha1 FROM queue WHERE status = :status ORDER BY id LIMIT :limit")
-    fun findByStatus(status: String, limit: Int): List<Queue>
+    @Query("SELECT id, file_name, mime_type, size, status, sha1, attempt_count FROM queue WHERE status = :status AND attempt_count <= :attemptCountLimit ORDER BY id LIMIT :limit")
+    fun findByStatus(status: String, attemptCountLimit: Int, limit: Int): List<Queue>
 
     @Update
     fun update(queue: Queue)

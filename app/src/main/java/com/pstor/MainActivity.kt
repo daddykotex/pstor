@@ -11,8 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.db.PStorDatabase
+import com.pstor.models.stats.StatsViewModel
 import com.pstor.preferences.Keys
 import com.pstor.preferences.SecurePreference
 
@@ -27,6 +29,8 @@ class MainActivity : AppCompatActivity() {
 
     private var securePreference: SecurePreference? = null
     private var db: PStorDatabase? = null
+
+    private lateinit var statsViewModel: StatsViewModel
 
     private val tag = "MainActivity"
 
@@ -55,27 +59,21 @@ class MainActivity : AppCompatActivity() {
 
         val tableLayout = findViewById<TableLayout>(R.id.tblStats)
         db = PStorDatabase.getDatabase(this)
+        statsViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(StatsViewModel::class.java)
 
-    override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
-        super.onTopResumedActivityChanged(isTopResumedActivity)
-        if (isTopResumedActivity) {
-            val tableLayout = findViewById<TableLayout>(R.id.tblStats)
-            db?.let { buildStats(tableLayout, it) }
-        }
+        statsViewModel?.let { buildStats(tableLayout, it) }
     }
 
-    private fun buildStats(tbl: TableLayout, db: PStorDatabase) {
-        fun <T> addRow(title: String, data: LiveData<T>, convert: (T) -> String) {
+    private fun buildStats(tbl: TableLayout, db: StatsViewModel) {
+        fun addRow(title: String, data: (StatsViewModel) -> LiveData<Long>) {
             val titleCol = TextView(this)
             titleCol.text = title
 
             val valueCol = TextView(this)
             valueCol.text = "N/A"
-            val valueObserver = Observer<T> { value ->
-                valueCol.text = convert(value)
-            }
-            data.observe(this, valueObserver)
-
+            data(db).observe(this, Observer<Long> {
+                valueCol.text = it.toString()
+            })
 
             val row = TableRow(this)
             row.addView(titleCol)
@@ -87,9 +85,9 @@ class MainActivity : AppCompatActivity() {
         //title column
         tbl.removeAllViews()
         tbl.setColumnStretchable(0, true)
-        addRow(getString(R.string.settings_app_stats_count_scanned), db.queueDAO().obsCount()) { it.toString() }
-        addRow(getString(R.string.settings_app_stats_count_uploaded), db.queueDAO().obsCountByStatus(ImageStatus.UPLOADED.toString())) { it.toString() }
-        addRow(getString(R.string.settings_app_stats_count_error), db.queueDAO().obsCountByStatus(ImageStatus.FAILED_TO_PROCESS.toString())) { it.toString() }
+        addRow(getString(R.string.settings_app_stats_count_scanned)) { it.allCount }
+        addRow(getString(R.string.settings_app_stats_count_uploaded)) { it.succeedCount }
+        addRow(getString(R.string.settings_app_stats_count_error)) { it.failedCount }
     }
 
 

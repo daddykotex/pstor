@@ -81,7 +81,8 @@ class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParam
                             mimeType,
                             size,
                             sha1,
-                            ImageStatus.IN_QUEUE.toString()
+                            ImageStatus.IN_QUEUE.toString(),
+                            0
                         )
                     )
                 } else if (ignored == null) {

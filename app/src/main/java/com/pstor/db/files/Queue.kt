@@ -11,5 +11,11 @@ data class Queue(
     @ColumnInfo(name = "mime_type") val mimeType: String,
     @ColumnInfo(name = "size") val size: Long,
     @ColumnInfo(name = "sha1") val sha1: String,
-    @ColumnInfo(name = "status") val status: String
-)
+    @ColumnInfo(name = "status") val status: String,
+    @ColumnInfo(name = "attempt_count") val attemptCount: Int
+
+) {
+    companion object {
+        const val AttemptCountLimit = 5
+    }
+}

@@ -89,7 +89,7 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
         }
         Log.i(tag, "Successfully retrieved an URL to start uploading: ${fileUrlResponse.uploadUrl}")
 
-        val queueItems = db.queueDAO().findByStatus(ImageStatus.IN_QUEUE.toString(), 50)
+        val queueItems = db.queueDAO().findByStatus(ImageStatus.IN_QUEUE.toString(), Queue.AttemptCountLimit, 50)
         Log.i(tag, "Processing with ${credentials.key}, images to process: ${queueItems.size}")
 
 
@@ -115,15 +115,15 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
                         val updated = q.copy(status = ImageStatus.UPLOADED.toString())
                         db.queueDAO().update(updated)
                     } else {
-                        val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
+                        val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString(), attemptCount = q.attemptCount + 1)
                         db.queueDAO().update(updated)
                     }
                 } catch (ex: FileNotFoundException) {
-                    val updated = q.copy(status = ImageStatus.FILE_NOT_FOUND.toString())
+                    val updated = q.copy(status = ImageStatus.FILE_NOT_FOUND.toString(), attemptCount = q.attemptCount + 1)
                     Log.w(tag, "File missing.", ex)
                     db.queueDAO().update(updated)
                 } catch (ex: Throwable) {
-                    val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString())
+                    val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString(), attemptCount = q.attemptCount + 1)
                     Log.e(tag, "Could not upload.", ex)
                     db.queueDAO().update(updated)
                 }
@@ -135,7 +135,7 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
         }
 
         if (queueItems.isEmpty()) {
-            val errorItems = db.queueDAO().findByStatus(ImageStatus.FAILED_TO_PROCESS.toString(), 50)
+            val errorItems = db.queueDAO().findByStatus(ImageStatus.FAILED_TO_PROCESS.toString(), Queue.AttemptCountLimit, 50)
             Log.i(tag, "Processing with ${credentials.key}, images to in error: ${errorItems.size}")
 
             upload(errorItems)
