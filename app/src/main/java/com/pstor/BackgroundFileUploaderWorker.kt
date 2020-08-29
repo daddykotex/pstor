@@ -100,22 +100,35 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
 
             queue.forEachIndexed { index, q ->
                 try {
-                    val result =
-                        uploadOne(fileUrlResponse.authorizationToken, fileUrlResponse.uploadUrl, q)
+                    if (!checkIfFileExists(auth, bucketId, q)) {
+                        val result =
+                            uploadOne(
+                                fileUrlResponse.authorizationToken,
+                                fileUrlResponse.uploadUrl,
+                                q
+                            )
 
-                    with(NotificationManagerCompat.from(appContext)) {
-                        notify(ProgressNotificationId, buildNotification(index, queue.size))
-                    }
+                        with(NotificationManagerCompat.from(appContext)) {
+                            notify(ProgressNotificationId, buildNotification(index, queue.size))
+                        }
 
-                    if (result != null) {
-                        Log.d(
-                            tag,
-                            "Upload successful of ${q.fileName} with a size of ${result.contentLength}"
-                        )
-                        val updated = q.copy(status = ImageStatus.UPLOADED.toString())
-                        db.queueDAO().update(updated)
+                        if (result != null) {
+                            Log.d(
+                                tag,
+                                "Upload successful of ${q.fileName} with a size of ${result.contentLength}"
+                            )
+                            val updated = q.copy(status = ImageStatus.UPLOADED.toString())
+                            db.queueDAO().update(updated)
+                        } else {
+                            val updated = q.copy(
+                                status = ImageStatus.FAILED_TO_PROCESS.toString(),
+                                attemptCount = q.attemptCount + 1
+                            )
+                            db.queueDAO().update(updated)
+                        }
                     } else {
-                        val updated = q.copy(status = ImageStatus.FAILED_TO_PROCESS.toString(), attemptCount = q.attemptCount + 1)
+                        Log.d(tag, "Nothing to upload. ${q.fileName} exists already.")
+                        val updated = q.copy(status = ImageStatus.UPLOADED.toString())
                         db.queueDAO().update(updated)
                     }
                 } catch (ex: FileNotFoundException) {
@@ -147,6 +160,14 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
         return Result.success()
     }
 
+    private fun checkIfFileExists(
+        auth: B2AccountAuthorization,
+        bucketId: String,
+        q: Queue
+    ): Boolean {
+        val exists = OkHttpB2FileClient.checkIfFileExists(auth, bucketId, q.fileName)
+        return exists?.contentSha1 == q.sha1
+    }
     private fun uploadOne(
         fileAuthToken: String,
         uploadUrl: String,

@@ -1,10 +1,7 @@
 package com.pstor.b2
 
 import android.util.Log
-import com.backblaze.b2.client.structures.B2AccountAuthorization
-import com.backblaze.b2.client.structures.B2FileVersion
-import com.backblaze.b2.client.structures.B2GetUploadUrlRequest
-import com.backblaze.b2.client.structures.B2UploadUrlResponse
+import com.backblaze.b2.client.structures.*
 import com.backblaze.b2.json.B2Json
 import com.backblaze.b2.json.B2JsonOptions
 import okhttp3.*
@@ -34,6 +31,26 @@ object OkHttpB2FileClient {
         OkHttpUtils.client.newCall(request).execute().use {
             return if (it.isSuccessful && it.body != null) {
                 B2Json.fromJsonOrThrowRuntime(it.body!!.string(), B2UploadUrlResponse::class.java)
+            } else {
+                null
+            }
+        }
+    }
+
+    fun checkIfFileExists(authorization: B2AccountAuthorization, bucketId: String, fileName: String): B2FileVersion? {
+        val body = B2GetFileInfoByNameRequest
+            .builder(bucketId, fileName)
+            .build()
+        val request = Request.Builder()
+            .url(buildUrl(authorization.apiUrl, "b2_get_file_info"))
+            .post(B2Json.toJsonOrThrowRuntime(body).toRequestBody(OkHttpUtils.JsonMediaType))
+            .headers(headersOf(
+                "Authorization", authorization.authorizationToken
+            ))
+            .build()
+        OkHttpUtils.client.newCall(request).execute().use {
+            return if (it.isSuccessful && it.body != null) {
+                B2Json.fromJsonOrThrowRuntime(it.body!!.string(), B2FileVersion::class.java)
             } else {
                 null
             }
