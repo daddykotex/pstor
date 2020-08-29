@@ -99,7 +99,7 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
 
             queue.forEachIndexed { index, q ->
                 try {
-                    if (!checkIfFileExists(auth, bucketId, q)) {
+                    if (!checkIfFileExists(auth, q)) {
                         val result =
                             uploadOne(
                                 fileUrlResponse.authorizationToken,
@@ -161,11 +161,10 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
 
     private fun checkIfFileExists(
         auth: B2AccountAuthorization,
-        bucketId: String,
         q: Queue
     ): Boolean {
-        val exists = OkHttpB2FileClient.checkIfFileExists(auth, bucketId, q.fileName)
-        return exists?.contentSha1 == q.sha1
+        val exists = OkHttpB2FileClient.getFileInfoByName(auth, q.fileName)
+        return exists.map { fileInfo -> fileInfo.sha1 == q.sha1 }.orElse(false)
     }
     private fun uploadOne(
         fileAuthToken: String,
@@ -181,7 +180,7 @@ class BackgroundFileUploaderWorker(private val appContext: Context, workerParams
         } else {
             Log.d(tag, "Ready to upload $contentUri.")
             return ins.source().use { stream ->
-                return OkHttpB2FileClient.uploadFile(
+                OkHttpB2FileClient.uploadFile(
                     fileAuthToken,
                     uploadUrl,
                     q.fileName,
