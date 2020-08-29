@@ -4,10 +4,12 @@ import android.util.Log
 import com.backblaze.b2.client.structures.*
 import com.backblaze.b2.json.B2Json
 import com.backblaze.b2.json.B2JsonOptions
-import okhttp3.*
 import okhttp3.Headers.Companion.headersOf
-import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import okio.Source
 

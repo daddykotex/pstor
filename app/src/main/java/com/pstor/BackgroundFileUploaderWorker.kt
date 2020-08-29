@@ -6,7 +6,6 @@ import android.net.Uri
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.room.Room
 import androidx.work.Data
 import androidx.work.Worker
 import androidx.work.WorkerParameters
