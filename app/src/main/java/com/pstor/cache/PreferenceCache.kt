@@ -1,6 +1,7 @@
 package com.pstor.cache
 
 import android.util.Log
+import arrow.core.Either
 import com.backblaze.b2.client.structures.B2AccountAuthorization
 import com.backblaze.b2.client.structures.B2UploadUrlResponse
 import com.backblaze.b2.json.B2Json
@@ -8,7 +9,6 @@ import com.pstor.B2Credentials
 import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.b2.OkHttpB2FileClient
 import com.pstor.preferences.SecurePreference
-import com.pstor.utils.Either
 import java.lang.RuntimeException
 
 class PreferenceCache(private val securePreference: SecurePreference) {
@@ -82,7 +82,7 @@ class PreferenceCache(private val securePreference: SecurePreference) {
             when (res) {
                 is Either.Right -> {
                     Log.d(tag, "Recording entry for $key.")
-                    securePreference.put(key, encode(res.right))
+                    securePreference.put(key, encode(res.b))
                 }
             }
             res
@@ -96,12 +96,12 @@ class PreferenceCache(private val securePreference: SecurePreference) {
                 is Either.Right -> {
                     val tsInSeconds = System.currentTimeMillis() / 1000
 
-                    if (res.right.isExpiring(tsInSeconds)) {
+                    if (res.b.isExpiring(tsInSeconds)) {
                         Log.d(tag, "Entry has expired, removing it.")
                         securePreference.remove(key)
                         orElse()
                     } else {
-                        Either.Right(res.right)
+                        Either.Right(res.b)
                     }
                 }
             }
@@ -111,13 +111,12 @@ class PreferenceCache(private val securePreference: SecurePreference) {
 
     private fun <T> jsonDecode(kClass: Class<T>): (String) -> Either<Throwable, T> {
         return { payload ->
-            Either.safe(
-                { B2Json.fromJsonOrThrowRuntime(payload, kClass) },
-                {
-                    Log.e(tag, payload, it)
-                    RuntimeException("Unable to decode JSON from cache.")
-                }
-            )
+            try {
+                Either.right(B2Json.fromJsonOrThrowRuntime(payload, kClass))
+            } catch (ex: Throwable) {
+                Log.e(tag, payload, ex)
+                Either.left(RuntimeException("Unable to decode JSON from cache."))
+            }
         }
     }
 }
