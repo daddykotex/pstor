@@ -216,4 +216,8 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val RC_BARCODE_CAPTURE = 9001
     }
+
+    fun launchPhotos(view: View) {
+        startActivity(Intent(this, PhotosViewer::class.java))
+    }
 }
