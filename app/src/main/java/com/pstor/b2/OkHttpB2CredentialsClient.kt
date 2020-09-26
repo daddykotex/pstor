@@ -4,6 +4,7 @@ import android.util.Log
 import com.backblaze.b2.client.structures.B2AccountAuthorization
 import com.backblaze.b2.json.B2Json
 import com.pstor.B2Credentials
+import com.pstor.preferences.SecurePreference
 import okhttp3.*
 import java.io.IOException
 

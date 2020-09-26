@@ -155,8 +155,7 @@ class BackgroundFileUploaderWorker(
                     }
                 }
 
-                val queueItems = db.queueDAO()
-                    .findByStatus(ImageStatus.IN_QUEUE.toString(), Queue.AttemptCountLimit, 50)
+                val queueItems = db.queueDAO().findByStatus(ImageStatus.IN_QUEUE.toString(), Queue.AttemptCountLimit, 50)
                 Log.i(
                     tag,
                     "Processing with ${credentials.key}, images to process: ${queueItems.size}"

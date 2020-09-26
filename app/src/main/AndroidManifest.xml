@@ -18,6 +18,8 @@
         android:roundIcon="@mipmap/pstor_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".PhotosViewer"></activity>
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -41,7 +43,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".BarcodeCaptureActivity" android:label="Read Barcode"/>
+        <activity
+            android:name=".BarcodeCaptureActivity"
+            android:label="Read Barcode" />
     </application>
 
 </manifest>

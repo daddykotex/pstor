@@ -35,28 +35,35 @@ def arrow_version = "0.10.4"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.core:core-ktx:1.3.1'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9"
+
+    implementation "androidx.appcompat:appcompat:1.2.0"
+    implementation "androidx.core:core-ktx:1.3.1"
     implementation "androidx.work:work-runtime-ktx:2.4.0"
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0'
+    implementation "androidx.constraintlayout:constraintlayout:2.0.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0"
+    implementation "androidx.activity:activity-ktx:1.1.0"
+
+
     implementation "com.squareup.okhttp3:okhttp:4.7.2"
-    implementation 'com.backblaze.b2:b2-sdk-core:3.1.0'
+    implementation "com.backblaze.b2:b2-sdk-core:3.1.0"
     implementation "commons-codec:commons-codec:1.14" //sha1
 
     //scan
-    implementation 'com.google.android.gms:play-services-vision:20.1.1'
+    implementation "com.google.android.gms:play-services-vision:20.1.2"
 
     def room_version = "2.2.5"
     implementation "androidx.room:room-runtime:$room_version"
-    kapt "android.arch.persistence.room:compiler:1.1.1"
+    kapt           "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
 
     implementation "io.arrow-kt:arrow-core:$arrow_version"
     implementation "io.arrow-kt:arrow-syntax:$arrow_version"
-    kapt    "io.arrow-kt:arrow-meta:$arrow_version"
+    kapt           "io.arrow-kt:arrow-meta:$arrow_version"
 
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    testImplementation        "junit:junit:4.12"
+    androidTestImplementation "androidx.test.ext:junit:1.1.2"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.3.0"
 }

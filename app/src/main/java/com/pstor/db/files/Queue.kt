@@ -17,5 +17,6 @@ data class Queue(
 ) {
     companion object {
         const val AttemptCountLimit = 5
+        const val NoLimit = Int.MAX_VALUE
     }
 }

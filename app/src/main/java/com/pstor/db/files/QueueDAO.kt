@@ -29,6 +29,9 @@ interface QueueDAO {
     @Query("SELECT id, file_name, mime_type, size, status, sha1, attempt_count FROM queue WHERE status = :status AND attempt_count <= :attemptCountLimit ORDER BY id LIMIT :limit")
     fun findByStatus(status: String, attemptCountLimit: Int, limit: Int): List<Queue>
 
+    @Query("SELECT id, file_name, mime_type, size, status, sha1, attempt_count FROM queue WHERE status = :status AND attempt_count <= :attemptCountLimit ORDER BY id LIMIT :limit")
+    suspend fun findByStatusAsync(status: String, attemptCountLimit: Int, limit: Int): List<Queue>
+
     @Update
     fun update(queue: Queue)
 

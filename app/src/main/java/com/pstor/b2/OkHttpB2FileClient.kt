@@ -69,14 +69,34 @@ object OkHttpB2FileClient {
         }
     }
 
-    fun getFileInfoByName(authorization: B2AccountAuthorization, fileName: String): Optional<FileInfo> {
-        val request = Request.Builder()
+    private fun prepareGetByName(authorization: B2AccountAuthorization, fileName: String): Request.Builder {
+        return Request.Builder()
             .url(downloadUrlByName(authorization.downloadUrl, authorization.allowed.bucketName, fileName))
-            .head()
+            .get()
             .headers(headersOf(
                 "Authorization", authorization.authorizationToken
             ))
-            .build()
+    }
+
+    fun getFileByName(authorization: B2AccountAuthorization, fileName: String, onError: (Throwable) -> Unit, callback: (ResponseBody?) -> Unit) {
+        val request = prepareGetByName(authorization, fileName).get().build()
+        OkHttpUtils.client.newCall(request).execute().use {
+            return if (it.isSuccessful && it.body != null) {
+                Log.d(tag, "Found file $fileName on B2.")
+                it.body.use {
+
+                }
+            } else if (it.code == 404) {
+                Log.d(tag, "File does not exist on B2.")
+                onError(RuntimeException("File does not exist"))
+            } else {
+                onError(RuntimeException("Unexpected exception looking for a file."))
+            }
+        }
+    }
+
+    fun getFileInfoByName(authorization: B2AccountAuthorization, fileName: String): Optional<FileInfo> {
+        val request = prepareGetByName(authorization, fileName).head().build()
         OkHttpUtils.client.newCall(request).execute().use {
             return if (it.isSuccessful && it.body != null) {
                 Log.d(tag, "Found file $fileName on B2.")
