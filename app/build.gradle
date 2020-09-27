@@ -53,6 +53,10 @@ dependencies {
     //scan
     implementation "com.google.android.gms:play-services-vision:20.1.2"
 
+    //images
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+
     def room_version = "2.2.5"
     implementation "androidx.room:room-runtime:$room_version"
     kapt           "androidx.room:room-compiler:$room_version"

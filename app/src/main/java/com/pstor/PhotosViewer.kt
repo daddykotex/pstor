@@ -1,22 +1,17 @@
 package com.pstor
 
-import android.app.Application
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageView
 import androidx.activity.viewModels
-import androidx.lifecycle.*
-import arrow.core.Either
-import arrow.core.Option
-import arrow.core.extensions.either.apply.tupled
-import arrow.core.firstOrNone
-import arrow.core.flatMap
-import com.pstor.b2.OkHttpB2FileClient
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import com.bumptech.glide.Glide
 import com.pstor.cache.PreferenceCache
 import com.pstor.db.PStorDatabase
-import com.pstor.db.files.Queue
 import com.pstor.models.images.ImageViewModel
 import com.pstor.preferences.SecurePreference
+
 
 class PhotosViewer : AppCompatActivity() {
     private val tag = this.javaClass.simpleName
@@ -28,6 +23,7 @@ class PhotosViewer : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_photos_viewer)
+
         securePreference = SecurePreference.load(this)
         preferenceCache = securePreference?.let { PreferenceCache(it) }
 
@@ -40,7 +36,8 @@ class PhotosViewer : AppCompatActivity() {
         })
 
 
-
+        val imageView: ImageView = findViewById(R.id.imageView) as ImageView
+        Glide.with(this).load("https://lh6.ggpht.com/9SZhHdv4URtBzRmXpnWxZcYhkgTQurFuuQ8OR7WZ3R7fyTmha77dYkVvcuqMu3DLvMQ=w300").into(imageView)
     }
 
 //    private fun loadImage() {

@@ -18,7 +18,6 @@ class ImageViewModel(private val app: Application) : AndroidViewModel(app) {
         emit(data)
     }
 
-
     fun getImage(): LiveData<Either<String, Queue>> {
         return image
     }
