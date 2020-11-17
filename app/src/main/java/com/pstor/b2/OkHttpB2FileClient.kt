@@ -12,9 +12,12 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
+import okio.IOException
 import okio.Source
 import java.lang.RuntimeException
 import java.util.*
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 data class FileInfo(val fileId: String, val fileName: String, val sha1: String, val contentType: String) {
     companion object {
@@ -40,7 +43,7 @@ object OkHttpB2FileClient {
         return "$baseUrl/b2api/v2/$path"
     }
 
-    private fun downloadUrlByName(downloadUrl: String, bucketName: String, fileName: String): String {
+    fun downloadUrlByName(downloadUrl: String, bucketName: String, fileName: String): String {
         return downloadUrl
             .toHttpUrl() //throws if bad
             .newBuilder()
@@ -49,6 +52,31 @@ object OkHttpB2FileClient {
             .addPathSegment(percentEncode(fileName))
             .build()
             .toString()
+    }
+
+    suspend fun getFileNames(authorization: B2AccountAuthorization, bucketId: String): B2ListFileVersionsResponse {
+        return suspendCoroutine { cont ->
+            val body = B2ListFileNamesRequest.builder(bucketId).setMaxFileCount(10).build()
+            val request = Request.Builder()
+                .url(buildUrl(authorization.apiUrl, "b2_list_file_names"))
+                .post(B2Json.toJsonOrThrowRuntime(body).toRequestBody(OkHttpUtils.JsonMediaType))
+                .headers(headersOf(
+                    "Authorization", authorization.authorizationToken
+                ))
+                .build()
+            OkHttpUtils.client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    cont.resumeWithException(e)
+                }
+                override fun onResponse(call: Call, response: Response) {
+                    if (response.isSuccessful && response.body != null) {
+                        B2Json.fromJsonOrThrowRuntime(response.body!!.string(), B2ListFileVersionsResponse::class.java)
+                    } else {
+                        cont.resumeWithException(RuntimeException("Unsuccessful response"))
+                    }
+                }
+            })
+        }
     }
 
     fun getUploadUrl(authorization: B2AccountAuthorization, bucketId: String): B2UploadUrlResponse? {
@@ -78,22 +106,22 @@ object OkHttpB2FileClient {
             ))
     }
 
-    fun getFileByName(authorization: B2AccountAuthorization, fileName: String, onError: (Throwable) -> Unit, callback: (ResponseBody?) -> Unit) {
-        val request = prepareGetByName(authorization, fileName).get().build()
-        OkHttpUtils.client.newCall(request).execute().use {
-            return if (it.isSuccessful && it.body != null) {
-                Log.d(tag, "Found file $fileName on B2.")
-                it.body.use {
-
-                }
-            } else if (it.code == 404) {
-                Log.d(tag, "File does not exist on B2.")
-                onError(RuntimeException("File does not exist"))
-            } else {
-                onError(RuntimeException("Unexpected exception looking for a file."))
-            }
-        }
-    }
+//    fun getFileByName(authorization: B2AccountAuthorization, fileName: String, onError: (Throwable) -> Unit, callback: (ResponseBody?) -> Unit) {
+//        val request = prepareGetByName(authorization, fileName).get().build()
+//        OkHttpUtils.client.newCall(request).execute().use {
+//            return if (it.isSuccessful && it.body != null) {
+//                Log.d(tag, "Found file $fileName on B2.")
+//                it.body.use {
+//
+//                }
+//            } else if (it.code == 404) {
+//                Log.d(tag, "File does not exist on B2.")
+//                onError(RuntimeException("File does not exist"))
+//            } else {
+//                onError(RuntimeException("Unexpected exception looking for a file."))
+//            }
+//        }
+//    }
 
     fun getFileInfoByName(authorization: B2AccountAuthorization, fileName: String): Optional<FileInfo> {
         val request = prepareGetByName(authorization, fileName).head().build()

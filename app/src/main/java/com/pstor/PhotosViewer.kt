@@ -7,6 +7,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.pstor.cache.PreferenceCache
 import com.pstor.db.PStorDatabase
 import com.pstor.models.images.ImageViewModel
@@ -16,7 +18,6 @@ import com.pstor.preferences.SecurePreference
 class PhotosViewer : AppCompatActivity() {
     private val tag = this.javaClass.simpleName
 
-    private var db: PStorDatabase? = null
     private var securePreference: SecurePreference? = null
     private var preferenceCache: PreferenceCache? = null
 
@@ -27,17 +28,18 @@ class PhotosViewer : AppCompatActivity() {
         securePreference = SecurePreference.load(this)
         preferenceCache = securePreference?.let { PreferenceCache(it) }
 
+        val imageView: ImageView = findViewById(R.id.imageView) as ImageView
         val image: ImageViewModel by viewModels()
         image.getImage().observe(this, Observer{ maybeImage ->
             maybeImage.fold(
                 { Log.e(tag, it) },
-                { Log.i(tag, "Yeah ${it.fileName}")}
+                {
+                    val headers = LazyHeaders.Builder().addHeader("Authorization", it.auth.authorizationToken).build()
+                    val url = GlideUrl(it.url, headers)
+                    Glide.with(this).load(url).into(imageView)
+                }
             )
         })
-
-
-        val imageView: ImageView = findViewById(R.id.imageView) as ImageView
-        Glide.with(this).load("https://lh6.ggpht.com/9SZhHdv4URtBzRmXpnWxZcYhkgTQurFuuQ8OR7WZ3R7fyTmha77dYkVvcuqMu3DLvMQ=w300").into(imageView)
     }
 
 //    private fun loadImage() {
