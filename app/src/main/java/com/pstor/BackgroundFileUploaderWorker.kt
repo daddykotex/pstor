@@ -96,7 +96,6 @@ class BackgroundFileUploaderWorker(
                         notify(ProgressNotificationId, buildNotification(0, queue.size))
                     }
 
-                    val success = Either.Right(Result.success())
                     queue.forEachIndexed { index, q ->
                         try {
                             if (!checkIfFileExists(auth, q)) {

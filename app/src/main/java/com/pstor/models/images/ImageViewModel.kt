@@ -4,10 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
-import arrow.core.Either
-import arrow.core.Option
+import arrow.core.*
 import arrow.core.extensions.either.apply.tupled
-import arrow.core.flatMap
 import com.backblaze.b2.client.structures.B2AccountAuthorization
 import com.pstor.B2Credentials
 import com.pstor.b2.OkHttpB2FileClient
@@ -37,16 +35,16 @@ class ImageViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun getBucketId(): Either<String, String> {
-        return Option.fromNullable(securePreference.get(Keys.BucketId)).toEither { "No bucket id." }
+        return securePreference.get(Keys.BucketId).rightIfNotNull { "No bucket id." }
     }
 
     private fun getAuth(): Either<String, B2AccountAuthorization> {
-        return Option.fromNullable(B2Credentials.loadFromPreferences(securePreference))
-            .toEither { "Unable to load authorization." }
+        return B2Credentials.loadFromPreferences(securePreference)
+            .rightIfNotNull { "Unable to load authorization." }
             .flatMap {
-                Option.fromNullable(preferenceCache)
-                    .toEither { "Unable to load preference cache." }
-                    .flatMap { pc -> pc.getAuth(it).mapLeft { err -> err.message ?: "" } }
+                preferenceCache
+                    .rightIfNotNull { "Unable to load preference cache." }
+                    .flatMap { pc -> pc.getAuth(it).mapLeft { err -> err.message ?: "Error while grabbing auth." } }
             }
     }
 
@@ -55,8 +53,8 @@ class ImageViewModel(app: Application) : AndroidViewModel(app) {
             .catch { OkHttpB2FileClient.getFileNames(auth, bucketId) }
             .mapLeft { err -> err.message ?: "Unable to load images" }
             .flatMap {
-                Option.fromNullable(it.files.firstOrNull())
-                    .toEither { "No images available." }
+                val first = it.files.firstOrNull()
+                first.rightIfNotNull { "No images available." }
                     .map { info ->
                         OkHttpB2FileClient.downloadUrlByName(
                             auth.downloadUrl,

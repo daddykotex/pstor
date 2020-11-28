@@ -16,6 +16,7 @@ import okio.IOException
 import okio.Source
 import java.lang.RuntimeException
 import java.util.*
+import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
@@ -54,7 +55,7 @@ object OkHttpB2FileClient {
             .toString()
     }
 
-    suspend fun getFileNames(authorization: B2AccountAuthorization, bucketId: String): B2ListFileVersionsResponse {
+    suspend fun getFileNames(authorization: B2AccountAuthorization, bucketId: String): B2ListFileNamesResponse {
         return suspendCoroutine { cont ->
             val body = B2ListFileNamesRequest.builder(bucketId).setMaxFileCount(10).build()
             val request = Request.Builder()
@@ -70,7 +71,7 @@ object OkHttpB2FileClient {
                 }
                 override fun onResponse(call: Call, response: Response) {
                     if (response.isSuccessful && response.body != null) {
-                        B2Json.fromJsonOrThrowRuntime(response.body!!.string(), B2ListFileVersionsResponse::class.java)
+                        cont.resume(B2Json.fromJsonOrThrowRuntime(response.body!!.string(), B2ListFileNamesResponse::class.java, B2JsonOptions.DEFAULT_AND_ALLOW_EXTRA_FIELDS))
                     } else {
                         cont.resumeWithException(RuntimeException("Unsuccessful response"))
                     }

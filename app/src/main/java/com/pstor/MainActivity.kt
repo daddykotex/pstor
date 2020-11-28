@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         db = PStorDatabase.getDatabase(this)
         statsViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(StatsViewModel::class.java)
 
-        statsViewModel?.let { buildStats(tableLayout, it) }
+        buildStats(tableLayout, statsViewModel)
     }
 
     private fun buildStats(tbl: TableLayout, db: StatsViewModel) {
