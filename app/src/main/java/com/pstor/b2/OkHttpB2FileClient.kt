@@ -91,7 +91,7 @@ object OkHttpB2FileClient {
             .build()
         OkHttpUtils.client.newCall(request).execute().use {
             return if (it.isSuccessful && it.body != null) {
-                B2Json.fromJsonOrThrowRuntime(it.body!!.string(), B2UploadUrlResponse::class.java)
+                B2Json.fromJsonOrThrowRuntime(it.body!!.string(), B2UploadUrlResponse::class.java, B2JsonOptions.DEFAULT_AND_ALLOW_EXTRA_FIELDS)
             } else {
                 null
             }

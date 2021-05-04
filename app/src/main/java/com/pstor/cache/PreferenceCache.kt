@@ -5,6 +5,7 @@ import arrow.core.Either
 import com.backblaze.b2.client.structures.B2AccountAuthorization
 import com.backblaze.b2.client.structures.B2UploadUrlResponse
 import com.backblaze.b2.json.B2Json
+import com.backblaze.b2.json.B2JsonOptions
 import com.pstor.B2Credentials
 import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.b2.OkHttpB2FileClient
@@ -112,7 +113,7 @@ class PreferenceCache(private val securePreference: SecurePreference) {
     private fun <T> jsonDecode(kClass: Class<T>): (String) -> Either<Throwable, T> {
         return { payload ->
             try {
-                Either.right(B2Json.fromJsonOrThrowRuntime(payload, kClass))
+                Either.right(B2Json.fromJsonOrThrowRuntime(payload, kClass, B2JsonOptions.DEFAULT_AND_ALLOW_EXTRA_FIELDS))
             } catch (ex: Throwable) {
                 Log.e(tag, payload, ex)
                 Either.left(RuntimeException("Unable to decode JSON from cache."))

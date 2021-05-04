@@ -3,6 +3,7 @@ package com.pstor.b2
 import android.util.Log
 import com.backblaze.b2.client.structures.B2AccountAuthorization
 import com.backblaze.b2.json.B2Json
+import com.backblaze.b2.json.B2JsonOptions
 import com.pstor.B2Credentials
 import com.pstor.preferences.SecurePreference
 import okhttp3.*
@@ -31,7 +32,8 @@ object OkHttpB2CredentialsClient {
             return if (response.isSuccessful && response.body != null) {
                 B2Json.fromJsonOrThrowRuntime(
                     response.body!!.string(),
-                    B2AccountAuthorization::class.java
+                    B2AccountAuthorization::class.java,
+                    B2JsonOptions.DEFAULT_AND_ALLOW_EXTRA_FIELDS
                 )
             } else {
                 null
@@ -56,7 +58,8 @@ object OkHttpB2CredentialsClient {
                     val decode =
                         B2Json.fromJsonOrThrowRuntime(
                             response.body!!.string(),
-                            B2AccountAuthorization::class.java
+                            B2AccountAuthorization::class.java,
+                            B2JsonOptions.DEFAULT_AND_ALLOW_EXTRA_FIELDS
                         )
                     callback(decode)
                 } else {
