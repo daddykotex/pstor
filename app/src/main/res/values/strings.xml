@@ -8,8 +8,13 @@
     <string name="settings_app_scan_btn">Scan QR</string>
     <string name="settings_app_save_btn">Save</string>
     <string name="settings_app_photo_btn">View Photos</string>
+    <string name="settings_app_clean_btn">Clean</string>
+    <string name="settings_app_clean_cancel_btn">Cancel</string>
     <string name="settings_app_barcode_confirmation_message">Do you want to apply settings for the bucket: %1$s.</string>
     <string name="settings_app_barcode_confirmation_title">Confirm settings</string>
+
+    <string name="settings_app_cleaning_confirmation_title">Cleaning confirmation</string>
+    <string name="settings_app_cleaning_confirmation_message">Please confirm that you want to remove photos older than %1$d days.</string>
 
     <string name="barcode_app_cancel_btn">Cancel</string>
 

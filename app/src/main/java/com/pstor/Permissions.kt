@@ -14,6 +14,7 @@ object Permissions {
         init {
             add(Manifest.permission.INTERNET)
             add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
     }
     val permissionsToRequest = sPermissions.toTypedArray()

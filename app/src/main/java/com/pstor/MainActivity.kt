@@ -1,5 +1,6 @@
 package com.pstor
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
@@ -17,11 +18,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.vision.barcode.Barcode import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.db.PStorDatabase
+import com.pstor.models.images.DeleteImageViewModel
 import com.pstor.models.stats.StatsViewModel
 import com.pstor.preferences.Keys
 import com.pstor.preferences.SecurePreference
 import kotlinx.android.synthetic.main.activity_main.*
-
 
 /*
 Required for this application:
@@ -36,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private var db: PStorDatabase? = null
 
     private lateinit var statsViewModel: StatsViewModel
+    private lateinit var deleteImageViewModel: DeleteImageViewModel
 
     private val tag = "MainActivity"
 
@@ -64,6 +66,8 @@ class MainActivity : AppCompatActivity() {
         statsViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(StatsViewModel::class.java)
 
         buildStats(tableLayout, statsViewModel)
+
+        deleteImageViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(DeleteImageViewModel::class.java)
     }
 
     private fun buildStats(tbl: TableLayout, db: StatsViewModel) {
@@ -168,36 +172,47 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RC_BARCODE_CAPTURE && resultCode == CommonStatusCodes.SUCCESS) {
-            Log.d(tag, "Successfully returning from barcode scanning.")
-            if (data != null) {
-                val barcode: Barcode? = data.getParcelableExtra(BarcodeCaptureActivity.BARCODE_OBJECT)
-                barcode?.let { barCodeVal ->
-                    Log.d(tag, "Barcode read correctly")
-                    validateBarcode(barCodeVal.rawValue).let { maybePair ->
-                        maybePair?.let { askAndApplySettings(it.first, it.second) }
+        if (requestCode == RC_BARCODE_CAPTURE) {
+            if (resultCode == CommonStatusCodes.SUCCESS) {
+                Log.d(tag, "Successfully returning from barcode scanning.")
+                if (data != null) {
+                    val barcode: Barcode? =
+                        data.getParcelableExtra(BarcodeCaptureActivity.BARCODE_OBJECT)
+                    barcode?.let { barCodeVal ->
+                        Log.d(tag, "Barcode read correctly")
+                        validateBarcode(barCodeVal.rawValue).let { maybePair ->
+                            maybePair?.let { askAndApplySettings(it.first, it.second) }
+                        }
                     }
+                } else {
+                    Log.d(tag, "No barcode captured, intent data is null")
                 }
-            } else {
-                Log.d(tag, "No barcode captured, intent data is null")
             }
-        } else {
-            Log.d(tag, "Capturing barcode failed.")
+        }
+
+        if (requestCode == DELETE_PERMISSION_REQUEST) {
+            if (resultCode == Activity.RESULT_OK) {
+                Log.i(tag, "User permission granted and images were deleted")
+                deleteImageViewModel.updateStatusOfPendingImages()
+            } else {
+                Log.i(tag, "User denied deletion")
+            }
         }
     }
+
 
     private fun askAndApplySettings(bucketId: String, credentials: B2Credentials) {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.settings_app_barcode_confirmation_title))
             .setMessage(getString(R.string.settings_app_barcode_confirmation_message, bucketId))
             .setIcon(android.R.drawable.ic_dialog_alert)
-            .setPositiveButton(android.R.string.yes
+            .setPositiveButton(android.R.string.ok
             ) { _, _ ->
                 txtBucketId.text = Editable.Factory.getInstance().newEditable(bucketId)
                 txtKeyId.text = Editable.Factory.getInstance().newEditable(credentials.keyId)
                 txtKey.text = Editable.Factory.getInstance().newEditable(credentials.key)
             }
-            .setNegativeButton(android.R.string.no, null).show()
+            .setNegativeButton(android.R.string.cancel, null).show()
     }
 
     private fun validateBarcode(barcode: String): Pair<String, B2Credentials>? {
@@ -215,9 +230,25 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val RC_BARCODE_CAPTURE = 9001
+        const val DELETE_PERMISSION_REQUEST = 9002
     }
 
     fun launchPhotos(view: View) {
         startActivity(Intent(this, PhotosViewer::class.java))
+    }
+
+    fun askForCleaning(view: View) {
+        deleteImageViewModel.requestImageDeletion { pi ->
+            Log.i(tag, "Asking for permissions to remove several files")
+            startIntentSenderForResult(
+                pi.intentSender,
+                DELETE_PERMISSION_REQUEST,
+                null,
+                0,
+                0,
+                0,
+                null
+            )
+        }
     }
 }
