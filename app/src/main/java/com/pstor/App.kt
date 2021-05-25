@@ -8,6 +8,9 @@ import android.util.Log
 import androidx.work.*
 import com.pstor.App.Companion.Notification.ChannelId
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
+import kotlin.time.minutes
 
 
 class App : Application(), Configuration.Provider {
@@ -17,6 +20,7 @@ class App : Application(), Configuration.Provider {
             .setMinimumLoggingLevel(Log.VERBOSE)
             .build()
 
+    @ExperimentalTime
     override fun onCreate() {
         super.onCreate()
 
@@ -25,29 +29,24 @@ class App : Application(), Configuration.Provider {
                 .setRequiredNetworkType(NetworkType.UNMETERED)
                 .setRequiresBatteryNotLow(true)
                 .build()
-        val fileScannerWorker =
-            PeriodicWorkRequestBuilder<BackgroundFileScannerWorker>(15, TimeUnit.MINUTES)
-                .setInitialDelay(1, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .build()
-        val fileUploaderWorker =
-            PeriodicWorkRequestBuilder<BackgroundFileUploaderWorker>(20, TimeUnit.MINUTES)
-                .setInitialDelay(1, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .build()
 
         val existingWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE
 
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            BackgroundFileScannerWorker::class.java.simpleName,
-            existingWorkPolicy,
-            fileScannerWorker
-        )
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            BackgroundFileUploaderWorker::class.java.simpleName,
-            existingWorkPolicy,
-            fileUploaderWorker
-        )
+        fun <T: ListenableWorker> registerPeriodicWorker(clazz: Class<T>, repeatInterval: Duration, initialDelay: Duration) {
+            val pReq =
+                PeriodicWorkRequest.Builder(clazz, repeatInterval.toLong(TimeUnit.SECONDS), TimeUnit.SECONDS)
+                    .setInitialDelay(initialDelay.toLong(TimeUnit.SECONDS), TimeUnit.SECONDS)
+                    .setConstraints(constraints)
+                    .build()
+            WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                clazz.javaClass.simpleName,
+                existingWorkPolicy,
+                pReq
+            )
+        }
+
+        registerPeriodicWorker(BackgroundFileScannerWorker::class.java, 15.minutes, 1.minutes)
+        registerPeriodicWorker(BackgroundFileUploaderWorker::class.java, 15.minutes, 2.minutes)
 
         createNotificationChannel()
     }
