@@ -163,6 +163,7 @@
         android:onClick="askForCleaning"
         android:visibility="visible"
         android:text="@string/settings_app_clean_btn"
+        android:enabled="false"
         app:layout_constraintStart_toEndOf="@+id/start_guideline"
         app:layout_constraintStart_toStartOf="@+id/start_guideline"
         app:layout_constraintTop_toBottomOf="@+id/tblStats" />

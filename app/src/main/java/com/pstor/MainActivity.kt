@@ -16,12 +16,12 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.vision.barcode.Barcode import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.db.PStorDatabase
 import com.pstor.models.images.DeleteImageViewModel
+import com.pstor.models.stats.CleanSizeViewModel
 import com.pstor.models.stats.StatsViewModel
 import com.pstor.preferences.Keys
 import com.pstor.preferences.SecurePreference
@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity(), Tagged {
 
     private lateinit var statsViewModel: StatsViewModel
     private lateinit var deleteImageViewModel: DeleteImageViewModel
+    private lateinit var cleanSizeViewModel: CleanSizeViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +66,7 @@ class MainActivity : AppCompatActivity(), Tagged {
         val tableLayout = findViewById<TableLayout>(R.id.tblStats)
         db = PStorDatabase.getDatabase(this)
         statsViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(StatsViewModel::class.java)
+        cleanSizeViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(CleanSizeViewModel::class.java)
 
         buildStats(tableLayout, statsViewModel)
 
@@ -72,14 +74,14 @@ class MainActivity : AppCompatActivity(), Tagged {
     }
 
     private fun buildStats(tbl: TableLayout, db: StatsViewModel) {
-        fun addRow(title: String, data: (StatsViewModel) -> LiveData<Long>) {
+        fun addRow(data: Pair<String, LiveData<String>>) {
             val titleCol = TextView(this)
-            titleCol.text = title
+            titleCol.text = data.first
 
             val valueCol = TextView(this)
             valueCol.text = "N/A"
-            data(db).observe(this, Observer<Long> {
-                valueCol.text = it.toString()
+            data.second.observe(this, {
+                valueCol.text = it
             })
 
             val row = TableRow(this)
@@ -92,10 +94,12 @@ class MainActivity : AppCompatActivity(), Tagged {
         //title column
         tbl.removeAllViews()
         tbl.setColumnStretchable(0, true)
-        addRow(getString(R.string.settings_app_stats_count_scanned)) { it.allCount }
-        addRow(getString(R.string.settings_app_stats_count_uploaded)) { it.uploadedCount }
-        addRow(getString(R.string.settings_app_stats_count_uploaded_and_removed)) { it.uploadedAndRemovedCount }
-        addRow(getString(R.string.settings_app_stats_count_error)) { it.failedCount }
+        db.stats.forEach { addRow(it.toPair()) }
+
+        val btnClean = findViewById<Button>(R.id.btnClean)
+        cleanSizeViewModel.toBeRemovedSize.observe(this, {
+            btnClean.isEnabled = it > 0
+        })
     }
 
 
@@ -143,7 +147,7 @@ class MainActivity : AppCompatActivity(), Tagged {
 
                     tvSaveResult.text = msg
                     tvSaveResult.setTextColor(color)
-                    tvSaveResult.visibility = View.VISIBLE
+                    tvSaveResult.visibility = VISIBLE
 
                     btnSave.isEnabled = true
                 }

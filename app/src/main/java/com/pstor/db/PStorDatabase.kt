@@ -21,6 +21,15 @@ abstract class PStorDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * Grabbed from com.pstor.db.PStorDatabase_Impl
+         */
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS `ToBeRemovedQueue` (`id` INTEGER NOT NULL, `size` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            }
+        }
+
         // Singleton prevents multiple instances of database opening at the
         // same time.
         @Volatile
@@ -38,7 +47,7 @@ abstract class PStorDatabase : RoomDatabase() {
                         PStorDatabase::class.java,
                         "pstor-database"
                     )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                 INSTANCE = instance
                 return instance

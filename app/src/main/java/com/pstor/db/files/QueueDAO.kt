@@ -35,6 +35,9 @@ interface QueueDAO {
     @Query("UPDATE queue SET status = :status WHERE id = :id")
     fun updateStatusById(id: Long, status: String): Int
 
+    @Query("UPDATE queue SET status = :status WHERE id in (:ids)")
+    fun updateStatusByIds(ids: List<Long>, status: String): Int
+
     @Update
     fun update(queue: Queue)
 
