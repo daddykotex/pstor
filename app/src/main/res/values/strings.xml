@@ -9,7 +9,7 @@
     <string name="settings_app_save_btn">Save</string>
     <string name="settings_app_photo_btn">View Photos</string>
     <string name="settings_app_clean_btn">Clean</string>
-    <string name="settings_app_clean_cancel_btn">Cancel</string>
+    <string name="settings_app_clean_no_image_toast">There are no images to remove.</string>
     <string name="settings_app_barcode_confirmation_message">Do you want to apply settings for the bucket: %1$s.</string>
     <string name="settings_app_barcode_confirmation_title">Confirm settings</string>
 
@@ -21,6 +21,7 @@
     <string name="settings_app_stats_txt">Statistics</string>
     <string name="settings_app_stats_count_scanned">File scanned</string>
     <string name="settings_app_stats_count_uploaded">File uploaded</string>
+    <string name="settings_app_stats_count_uploaded_and_removed">File archived</string>
     <string name="settings_app_stats_count_error">Files in error</string>
 
 
@@ -29,7 +30,6 @@
 
 
     <string name="common_errors_empty">Please enter a value</string>
-    <string name="common_laoding">Loading</string>
 
     <string name="notitication_channel_name">PStor notification channel</string>
     <string name="notitication_channel_description">This channel is used to transmit notification around uploads.</string>

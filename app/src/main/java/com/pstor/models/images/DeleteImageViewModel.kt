@@ -7,6 +7,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.core.extensions.list.foldable.nonEmpty
 import com.pstor.ImageStatus
 import com.pstor.ImageUri
 import com.pstor.db.PStorDatabase
@@ -45,13 +46,14 @@ class DeleteImageViewModel(private val app: Application) : AndroidViewModel(app)
         }
     }
 
-    fun requestImageDeletion(withPi: (PendingIntent) -> Unit) {
-        viewModelScope.launch { buildDeleteRequest(withPi) }
+    fun requestImageDeletion(withPi: (PendingIntent) -> Unit, onNoImages: () -> Unit) {
+        viewModelScope.launch { buildDeleteRequest(withPi, onNoImages) }
     }
 
-    private suspend fun buildDeleteRequest(withPi: (PendingIntent) -> Unit) {
+    private suspend fun buildDeleteRequest(withPi: (PendingIntent) -> Unit, onNoImages: () -> Unit) {
         val now = Instant.now(Clock.systemUTC())
-        val sixMonthOld = now.minus(6 * 30, ChronoUnit.DAYS)
+        val daysOld: Long = 5 * 30
+        val sixMonthOld = now.minus(daysOld, ChronoUnit.DAYS)
 
         fun buildImagesDeletionRequest(images: List<FileInfo>): PendingIntent? {
             Log.i(tag, "Generating delete request for %d files.".format(images.size))
@@ -98,33 +100,42 @@ class DeleteImageViewModel(private val app: Application) : AndroidViewModel(app)
         fun getImages(): List<FileInfo> {
             val idList = db.queueDAO().findAllIdsByStatus(ImageStatus.UPLOADED.toString())
             return idList
-                .take(50)
                 .flatMap { imageId ->
                     val fileInfo = getFileInfo(imageId)
                     if (fileInfo == null) {
+                        Log.d(tag, "No info for %d".format(imageId))
                         db.queueDAO().updateStatusById(imageId, ImageStatus.UPLOADED_AND_REMOVED.toString())
                         emptyList()
                     } else {
+                        Log.d(tag, "Has info for %d".format(imageId))
                         listOfNotNull(fileInfo)
                     }
                 }
                 .flatMap { fileInfo ->
                     val added = fileInfo.instantAdded()
                     if (added.isBefore(sixMonthOld)) {
+                        Log.d(tag, "Removing %d because it is older than %d days old.".format(fileInfo.id, daysOld))
                         listOf(fileInfo)
                     } else {
+                        Log.d(tag, "Not removing %d because it is not old enough.".format(fileInfo.id))
                         emptyList()
                     }
                 }
-                .take(50)
+                .take(250)
         }
 
         withContext(Dispatchers.IO) {
             val images = getImages()
-            val pi = buildImagesDeletionRequest(images)
-            pendingImagesToDelete = images
-            pi?.let {
-                withPi(it)
+            if (images.nonEmpty()) {
+                Log.d(tag, "Asking for removal of %d images.".format(images.size))
+                val pi = buildImagesDeletionRequest(images)
+                pendingImagesToDelete = images
+                pi?.let {
+                    withPi(it)
+                }
+            } else {
+                Log.d(tag, "No images to remove.")
+                onNoImages()
             }
         }
     }

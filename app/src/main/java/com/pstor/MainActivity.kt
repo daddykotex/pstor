@@ -2,6 +2,7 @@ package com.pstor
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -9,6 +10,8 @@ import android.text.Editable
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -92,7 +95,8 @@ class MainActivity : AppCompatActivity() {
         tbl.removeAllViews()
         tbl.setColumnStretchable(0, true)
         addRow(getString(R.string.settings_app_stats_count_scanned)) { it.allCount }
-        addRow(getString(R.string.settings_app_stats_count_uploaded)) { it.succeedCount }
+        addRow(getString(R.string.settings_app_stats_count_uploaded)) { it.uploadedCount }
+        addRow(getString(R.string.settings_app_stats_count_uploaded_and_removed)) { it.uploadedAndRemovedCount }
         addRow(getString(R.string.settings_app_stats_count_error)) { it.failedCount }
     }
 
@@ -238,8 +242,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun askForCleaning(view: View) {
-        deleteImageViewModel.requestImageDeletion { pi ->
+        val progressBar = findViewById<ProgressBar>(R.id.pBar)
+
+        val onDelete: (PendingIntent) -> Unit = { pi ->
             Log.i(tag, "Asking for permissions to remove several files")
+
+            runOnUiThread {
+                progressBar.visibility = GONE
+                view.visibility = VISIBLE
+            }
+
             startIntentSenderForResult(
                 pi.intentSender,
                 DELETE_PERMISSION_REQUEST,
@@ -250,5 +262,18 @@ class MainActivity : AppCompatActivity() {
                 null
             )
         }
+        val onNoImages: () -> Unit = {
+            runOnUiThread {
+                progressBar.visibility = GONE
+                view.visibility = VISIBLE
+                Toast
+                    .makeText(applicationContext, getString(R.string.settings_app_clean_no_image_toast), Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
+
+        progressBar.visibility = VISIBLE
+        view.visibility = GONE
+        deleteImageViewModel.requestImageDeletion(onDelete, onNoImages)
     }
 }
