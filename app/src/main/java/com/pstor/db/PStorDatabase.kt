@@ -6,15 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.pstor.db.files.IgnoredQueue
-import com.pstor.db.files.IgnoredQueueDAO
-import com.pstor.db.files.Queue
-import com.pstor.db.files.QueueDAO
+import com.pstor.db.files.*
 
-@Database(entities = arrayOf(Queue::class, IgnoredQueue::class), version = 2)
+@Database(entities = arrayOf(Queue::class, IgnoredQueue::class, ToBeRemovedQueue::class), version = 3)
 abstract class PStorDatabase : RoomDatabase() {
     abstract fun queueDAO(): QueueDAO
     abstract fun ignoreQueueDAO(): IgnoredQueueDAO
+    abstract fun toBeRemovedQueueDAO(): ToBeRemovedQueueDAO
 
     companion object {
         private val MIGRATION_1_2 = object : Migration(1, 2) {

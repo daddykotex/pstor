@@ -48,6 +48,8 @@ class App : Application(), Configuration.Provider {
         registerPeriodicWorker(BackgroundFileScannerWorker::class.java, 15.minutes, 1.minutes)
         registerPeriodicWorker(BackgroundFileUploaderWorker::class.java, 15.minutes, 2.minutes)
 
+        registerPeriodicWorker(BackgroundFileUploaderWorker::class.java, 60.minutes, 5.minutes)
+
         createNotificationChannel()
     }
 
