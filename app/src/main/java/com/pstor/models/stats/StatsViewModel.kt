@@ -4,9 +4,10 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import com.pstor.ImageStatus
+import com.pstor.Tagged
 import com.pstor.db.PStorDatabase
 
-class StatsViewModel(application: Application) : AndroidViewModel(application) {
+class StatsViewModel(application: Application) : AndroidViewModel(application), Tagged {
     val allCount: LiveData<Long>
     val uploadedCount: LiveData<Long>
     val uploadedAndRemovedCount: LiveData<Long>

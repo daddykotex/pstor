@@ -19,9 +19,7 @@ import com.google.android.gms.vision.barcode.BarcodeDetector
 import java.io.IOException
 
 
-class BarcodeCaptureActivity : AppCompatActivity() {
-    private val tag = "BarcodeCaptureActivity"
-
+class BarcodeCaptureActivity : AppCompatActivity(), Tagged {
     private var mPreview: CameraSourcePreview? = null
     private var mCameraSource: CameraSource? = null
 

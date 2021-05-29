@@ -34,15 +34,13 @@ Required for this application:
   B2_APPLICATION_KEY
  */
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), Tagged {
 
     private var securePreference: SecurePreference? = null
     private var db: PStorDatabase? = null
 
     private lateinit var statsViewModel: StatsViewModel
     private lateinit var deleteImageViewModel: DeleteImageViewModel
-
-    private val tag = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

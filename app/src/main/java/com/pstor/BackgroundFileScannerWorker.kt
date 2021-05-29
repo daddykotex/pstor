@@ -12,9 +12,7 @@ import org.apache.commons.codec.digest.DigestUtils
 import java.io.FileNotFoundException
 
 class BackgroundFileScannerWorker(appContext: Context, workerParams: WorkerParameters) :
-    Worker(appContext, workerParams) {
-
-    private val tag = "BackgroundFileScannerWorker"
+    Worker(appContext, workerParams), Tagged {
 
     private val db: PStorDatabase = PStorDatabase.getDatabase(appContext)
 

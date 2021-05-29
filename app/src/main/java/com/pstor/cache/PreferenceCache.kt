@@ -7,14 +7,13 @@ import com.backblaze.b2.client.structures.B2UploadUrlResponse
 import com.backblaze.b2.json.B2Json
 import com.backblaze.b2.json.B2JsonOptions
 import com.pstor.B2Credentials
+import com.pstor.Tagged
 import com.pstor.b2.OkHttpB2CredentialsClient
 import com.pstor.b2.OkHttpB2FileClient
 import com.pstor.preferences.SecurePreference
 import java.lang.RuntimeException
 
-class PreferenceCache(private val securePreference: SecurePreference) {
-
-    private val tag = "PreferenceCache"
+class PreferenceCache(private val securePreference: SecurePreference): Tagged {
 
     fun getFileUrl(auth: B2AccountAuthorization, bucketId: String): Either<Throwable, B2UploadUrlResponse> {
         fun fetchFileURL(): Either<Throwable, B2UploadUrlResponse> {

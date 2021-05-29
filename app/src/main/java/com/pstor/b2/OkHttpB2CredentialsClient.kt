@@ -5,12 +5,11 @@ import com.backblaze.b2.client.structures.B2AccountAuthorization
 import com.backblaze.b2.json.B2Json
 import com.backblaze.b2.json.B2JsonOptions
 import com.pstor.B2Credentials
-import com.pstor.preferences.SecurePreference
+import com.pstor.Tagged
 import okhttp3.*
 import java.io.IOException
 
-object OkHttpB2CredentialsClient {
-    private val tag = this.javaClass.simpleName
+object OkHttpB2CredentialsClient: Tagged {
     private const val url = "https://api.backblazeb2.com/b2api/v2/b2_authorize_account"
 
     private fun buildRequest(b2Credentials: B2Credentials): Request {

@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import arrow.core.extensions.list.foldable.nonEmpty
 import com.pstor.ImageStatus
 import com.pstor.ImageUri
+import com.pstor.Tagged
 import com.pstor.db.PStorDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,9 +20,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 
-class DeleteImageViewModel(private val app: Application) : AndroidViewModel(app) {
-
-    private val tag = this.javaClass.simpleName
+class DeleteImageViewModel(private val app: Application) : AndroidViewModel(app), Tagged {
 
     private val db: PStorDatabase = PStorDatabase.getDatabase(app)
 

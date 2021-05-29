@@ -6,6 +6,7 @@ import com.backblaze.b2.json.B2Json
 import com.backblaze.b2.json.B2JsonOptions
 import com.backblaze.b2.util.B2StringUtil.percentEncode
 import com.pstor.B2Credentials
+import com.pstor.Tagged
 import okhttp3.*
 import okhttp3.Headers.Companion.headersOf
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -37,8 +38,7 @@ data class FileInfo(val fileId: String, val fileName: String, val sha1: String, 
     }
 }
 
-object OkHttpB2FileClient {
-    private val tag = this.javaClass.simpleName
+object OkHttpB2FileClient: Tagged {
 
     private fun buildUrl(baseUrl: String, path: String): String {
         return "$baseUrl/b2api/v2/$path"

@@ -15,9 +15,7 @@ import com.pstor.models.images.ImageViewModel
 import com.pstor.preferences.SecurePreference
 
 
-class PhotosViewer : AppCompatActivity() {
-    private val tag = this.javaClass.simpleName
-
+class PhotosViewer : AppCompatActivity(), Tagged {
     private var securePreference: SecurePreference? = null
     private var preferenceCache: PreferenceCache? = null
 

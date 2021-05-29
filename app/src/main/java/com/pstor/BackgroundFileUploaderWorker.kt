@@ -28,9 +28,7 @@ import java.io.FileNotFoundException
 class BackgroundFileUploaderWorker(
     private val appContext: Context,
     workerParams: WorkerParameters
-) :
-    Worker(appContext, workerParams) {
-    private val tag = this.javaClass.simpleName
+) : Worker(appContext, workerParams), Tagged {
 
     private val db: PStorDatabase = PStorDatabase.getDatabase(appContext)
 

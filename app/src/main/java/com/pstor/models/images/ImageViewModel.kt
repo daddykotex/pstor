@@ -8,12 +8,13 @@ import arrow.core.*
 import arrow.core.extensions.either.apply.tupled
 import com.backblaze.b2.client.structures.B2AccountAuthorization
 import com.pstor.B2Credentials
+import com.pstor.Tagged
 import com.pstor.b2.OkHttpB2FileClient
 import com.pstor.cache.PreferenceCache
 import com.pstor.preferences.Keys
 import com.pstor.preferences.SecurePreference
 
-data class ImageToLoad(val url: String, val auth: B2AccountAuthorization)
+data class ImageToLoad(val url: String, val auth: B2AccountAuthorization): Tagged
 
 class ImageViewModel(app: Application) : AndroidViewModel(app) {
 
