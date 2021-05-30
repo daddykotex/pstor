@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.work.Data
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -14,8 +13,6 @@ import arrow.core.flatMap
 import com.backblaze.b2.client.structures.B2AccountAuthorization
 import com.backblaze.b2.client.structures.B2FileVersion
 import com.backblaze.b2.client.structures.B2UploadUrlResponse
-import com.pstor.App.Companion.Notification.ChannelId
-import com.pstor.App.Companion.Notification.ProgressNotificationId
 import com.pstor.b2.OkHttpB2FileClient
 import com.pstor.cache.PreferenceCache
 import com.pstor.db.PStorDatabase
@@ -34,13 +31,6 @@ class BackgroundFileUploaderWorker(
 
     private val securePreference: SecurePreference = SecurePreference.load(appContext)
     private val preferenceCache = PreferenceCache(securePreference)
-
-    override fun onStopped() {
-        super.onStopped()
-        with(NotificationManagerCompat.from(appContext)) {
-            cancel(ProgressNotificationId)
-        }
-    }
 
     override fun doWork(): Result {
         Log.i(tag, "Starting work.")
@@ -90,10 +80,6 @@ class BackgroundFileUploaderWorker(
                 )
 
                 fun upload(queue: List<Queue>) {
-                    with(NotificationManagerCompat.from(appContext)) {
-                        notify(ProgressNotificationId, buildNotification(0, queue.size))
-                    }
-
                     queue.forEachIndexed { index, q ->
                         try {
                             if (!checkIfFileExists(auth, q)) {
@@ -103,13 +89,6 @@ class BackgroundFileUploaderWorker(
                                         fileUrlResponse.uploadUrl,
                                         q
                                     )
-
-                                with(NotificationManagerCompat.from(appContext)) {
-                                    notify(
-                                        ProgressNotificationId,
-                                        buildNotification(index, queue.size)
-                                    )
-                                }
 
                                 if (result != null) {
                                     Log.d(
@@ -145,10 +124,6 @@ class BackgroundFileUploaderWorker(
                             Log.e(tag, "Could not upload.", ex)
                             db.queueDAO().update(updated)
                         }
-                    }
-
-                    with(NotificationManagerCompat.from(appContext)) {
-                        cancel(ProgressNotificationId)
                     }
                 }
 
@@ -215,20 +190,5 @@ class BackgroundFileUploaderWorker(
             }
         }
 
-    }
-
-    private fun buildNotification(current: Int, total: Int): Notification {
-        return NotificationCompat.Builder(appContext, ChannelId)
-            .setSmallIcon(R.mipmap.pstor_launcher)
-            .setContentTitle(appContext.getString(R.string.notitication_progress_title))
-            .setContentText(
-                appContext.getString(
-                    R.string.notitication_progress_description,
-                    current,
-                    total
-                )
-            )
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
     }
 }
