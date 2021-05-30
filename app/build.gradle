@@ -3,7 +3,24 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
+def getProjectArg(key) {
+    if (project.hasProperty(key)) {
+        return project.getProperty(key)
+    } else {
+        println("PLEASE DEFINE `-P" + key + "`.")
+        throw new RuntimeException("no `" + key + "` given.")
+    }
+}
+
 android {
+    signingConfigs {
+        pstor {
+            storeFile file('/Users/david/.android-pks')
+            storePassword getProjectArg("store.password")
+            keyAlias 'pstor'
+            keyPassword getProjectArg("pstor.password")
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion "29.0.3"
 
@@ -25,6 +42,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.pstor
         }
     }
 
