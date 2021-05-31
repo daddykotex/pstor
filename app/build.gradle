@@ -16,9 +16,9 @@ android {
     signingConfigs {
         pstor {
             storeFile file('/Users/david/.android-pks')
-            storePassword getProjectArg("store.password")
+            storePassword getProjectArg("store_password")
             keyAlias 'pstor'
-            keyPassword getProjectArg("pstor.password")
+            keyPassword getProjectArg("pstor_password")
         }
     }
     compileSdkVersion 30
