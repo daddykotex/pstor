@@ -5,14 +5,15 @@ import android.util.Log
 import androidx.work.*
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
-import kotlin.time.minutes
 
 
 class App : Application(), Configuration.Provider {
 
-    override fun getWorkManagerConfiguration() =
-        Configuration.Builder()
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
             .setMinimumLoggingLevel(Log.VERBOSE)
             .build()
 
@@ -30,8 +31,8 @@ class App : Application(), Configuration.Provider {
 
         fun <T: ListenableWorker> registerPeriodicWorker(clazz: Class<T>, repeatInterval: Duration, initialDelay: Duration) {
             val pReq =
-                PeriodicWorkRequest.Builder(clazz, repeatInterval.toLong(TimeUnit.SECONDS), TimeUnit.SECONDS)
-                    .setInitialDelay(initialDelay.toLong(TimeUnit.SECONDS), TimeUnit.SECONDS)
+                PeriodicWorkRequest.Builder(clazz, repeatInterval.toLong(DurationUnit.SECONDS), TimeUnit.SECONDS)
+                    .setInitialDelay(initialDelay.toLong(DurationUnit.SECONDS), TimeUnit.SECONDS)
                     .setConstraints(constraints)
                     .build()
             WorkManager.getInstance(this).enqueueUniquePeriodicWork(

@@ -19,13 +19,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.vision.barcode.Barcode import com.pstor.b2.OkHttpB2CredentialsClient
+import com.pstor.databinding.ActivityMainBinding
 import com.pstor.db.PStorDatabase
 import com.pstor.models.images.DeleteImageViewModel
 import com.pstor.models.stats.CleanSizeViewModel
 import com.pstor.models.stats.StatsViewModel
 import com.pstor.preferences.Keys
 import com.pstor.preferences.SecurePreference
-import kotlinx.android.synthetic.main.activity_main.*
 
 /*
 Required for this application:
@@ -42,10 +42,12 @@ class MainActivity : AppCompatActivity(), Tagged {
     private lateinit var statsViewModel: StatsViewModel
     private lateinit var deleteImageViewModel: DeleteImageViewModel
     private lateinit var cleanSizeViewModel: CleanSizeViewModel
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
 
         Log.i(tag, "onCreate")
 
@@ -55,12 +57,12 @@ class MainActivity : AppCompatActivity(), Tagged {
 
         val creds = securePreference?.let { B2Credentials.loadFromPreferences(it) }
         creds?.let {
-            txtKeyId?.text = Editable.Factory.getInstance().newEditable(it.keyId)
-            txtKey?.text = Editable.Factory.getInstance().newEditable(it.key)
+            binding.txtKeyId.text = Editable.Factory.getInstance().newEditable(it.keyId)
+            binding.txtKey.text = Editable.Factory.getInstance().newEditable(it.key)
         }
         val bId = securePreference?.let { it.get(Keys.BucketId) }
         bId?.let {
-            txtBucketId.text = Editable.Factory.getInstance().newEditable(it)
+            binding.txtBucketId.text = Editable.Factory.getInstance().newEditable(it)
         }
 
         val tableLayout = findViewById<TableLayout>(R.id.tblStats)
@@ -214,9 +216,9 @@ class MainActivity : AppCompatActivity(), Tagged {
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton(android.R.string.ok
             ) { _, _ ->
-                txtBucketId.text = Editable.Factory.getInstance().newEditable(bucketId)
-                txtKeyId.text = Editable.Factory.getInstance().newEditable(credentials.keyId)
-                txtKey.text = Editable.Factory.getInstance().newEditable(credentials.key)
+                binding.txtBucketId.text = Editable.Factory.getInstance().newEditable(bucketId)
+                binding.txtKeyId.text = Editable.Factory.getInstance().newEditable(credentials.keyId)
+                binding.txtKey.text = Editable.Factory.getInstance().newEditable(credentials.key)
             }
             .setNegativeButton(android.R.string.cancel, null).show()
     }

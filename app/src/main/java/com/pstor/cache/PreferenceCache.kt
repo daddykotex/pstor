@@ -84,6 +84,9 @@ class PreferenceCache(private val securePreference: SecurePreference): Tagged {
                     Log.d(tag, "Recording entry for $key.")
                     securePreference.put(key, encode(res.b))
                 }
+                is Either.Left -> {
+                    Log.e(tag, "Exception grabbing the fallback value", res.a)
+                }
             }
             res
         } else {
